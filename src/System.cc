@@ -27,6 +27,7 @@
 #include <thread>
 #include <pangolin/pangolin.h>
 #include <iomanip>
+#include "MapPoint.h"
 
 namespace ORB_SLAM2
 {
@@ -294,6 +295,19 @@ bool System::MapChanged()
         return false;
 }
 
+vector<KeyFrame*> System::GetAllKeyFrames(){
+    return mpMap->GetAllKeyFrames();
+}
+
+vector<MapPoint*> System::GetAllMapPoints(){
+    mpMap->GetAllKeyFrames();
+}
+
+//cv::Mat System::GetMapCloud() {
+//    return mpMap->GetMapCloud();
+//}
+//cv::Mat System::GetMapCloud() {cv::Mat a; a.push_back(1); return a;}
+
 void System::Reset()
 {
     unique_lock<mutex> lock(mMutexReset);
@@ -380,7 +394,6 @@ void System::SaveTrajectoryTUM(const string &filename)
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
-
 
 void System::SaveKeyFrameTrajectoryTUM(const string &filename)
 {

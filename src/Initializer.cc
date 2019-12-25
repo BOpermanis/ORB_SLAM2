@@ -111,7 +111,7 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatc
     // Compute ratio of scores
     float RH = SH/(SH+SF);
 
-    // Try to reconstruct from homography or fundamental depending on the ratio (0.40-0.45)
+    // Try to reconstruct from homography or fundamental depending on the ratio (0.40-0.45
     if(RH>0.40)
         return ReconstructH(vbMatchesInliersH,H,mK,R21,t21,vP3D,vbTriangulated,1.0,50);
     else //if(pF_HF>0.6)
@@ -174,6 +174,7 @@ void Initializer::FindHomography(vector<bool> &vbMatchesInliers, float &score, c
 
 void Initializer::FindFundamental(vector<bool> &vbMatchesInliers, float &score, cv::Mat &F21)
 {
+
     // Number of putative matches
     const int N = vbMatchesInliers.size();
 
@@ -716,9 +717,13 @@ bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv:
             secondBestGood = nGood;
         }
     }
+    bool cond1 = secondBestGood<1.3*bestGood;
+    bool cond2 = bestParallax>=minParallax;
+    bool cond3 = bestGood>minTriangulated;
+    bool cond4 = bestGood>0.9*N;
 
-
-    if(secondBestGood<0.75*bestGood && bestParallax>=minParallax && bestGood>minTriangulated && bestGood>0.9*N)
+    cout << cond1 << " " << cond2 << " " << cond3 << " " << cond4 << endl;
+    if(cond1 && cond2 && cond3 && cond4)
     {
         vR[bestSolutionIdx].copyTo(R21);
         vt[bestSolutionIdx].copyTo(t21);

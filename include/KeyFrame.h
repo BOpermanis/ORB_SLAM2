@@ -222,7 +222,8 @@ protected:
     // Bad flags
     bool mbNotErase;
     bool mbToBeErased;
-    bool mbBad;    
+    bool mbBad;
+    long id;
 
     float mHalfBaseline; // Only for visualization
 

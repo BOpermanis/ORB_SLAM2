@@ -27,8 +27,6 @@
 
 #include <mutex>
 
-
-
 namespace ORB_SLAM2
 {
 
@@ -50,7 +48,10 @@ public:
 
     std::vector<KeyFrame*> GetAllKeyFrames();
     std::vector<MapPoint*> GetAllMapPoints();
+
     std::vector<MapPoint*> GetReferenceMapPoints();
+    cv::Mat GetMapCloud();
+//    cv::Mat GetMapCloud() {cv::Mat a; a.push_back(1); return a;};
 
     long unsigned int MapPointsInMap();
     long unsigned  KeyFramesInMap();

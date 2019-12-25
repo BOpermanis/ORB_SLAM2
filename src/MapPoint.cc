@@ -94,6 +94,13 @@ KeyFrame* MapPoint::GetReferenceKeyFrame()
     unique_lock<mutex> lock(mMutexFeatures);
     return mpRefKF;
 }
+cv::Mat MapPoint::GetReferenceKeyFrame2()
+{
+    unique_lock<mutex> lock(mMutexFeatures);
+    return mpRefKF->GetTranslation();
+//    return mpRefKF->GetCameraCenter();
+}
+
 
 void MapPoint::AddObservation(KeyFrame* pKF, size_t idx)
 {

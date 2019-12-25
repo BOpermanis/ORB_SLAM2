@@ -47,6 +47,7 @@ public:
 
     cv::Mat GetNormal();
     KeyFrame* GetReferenceKeyFrame();
+    cv::Mat GetReferenceKeyFrame2();
 
     std::map<KeyFrame*,size_t> GetObservations();
     int Observations();
@@ -132,6 +133,7 @@ protected:
      // Tracking counters
      int mnVisible;
      int mnFound;
+     long id;
 
      // Bad flag (we do not currently erase MapPoint from memory)
      bool mbBad;

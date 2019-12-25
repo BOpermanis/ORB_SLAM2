@@ -26,6 +26,7 @@
 #include<thread>
 #include<opencv2/core/core.hpp>
 
+#include "MapPoint.h"
 #include "Tracking.h"
 #include "FrameDrawer.h"
 #include "MapDrawer.h"
@@ -120,7 +121,24 @@ public:
     // You can call this right after TrackMonocular (or stereo or RGBD)
     int GetTrackingState();
     std::vector<MapPoint*> GetTrackedMapPoints();
+    std::vector<KeyFrame*> GetAllKeyFrames();
+    std::vector<MapPoint*> GetAllMapPoints();
+//    cv::Mat GetMapCloud() {return mpMap->GetMapCloud();};
+    cv::Mat GetMapCloud() {
+        cv::Mat out;
+        MapPoint* it;
+        for(auto it: mpMap->GetAllMapPoints()){
+            out.push_back(it->GetWorldPos());
+//            out.push_back(it->GetReferenceKeyFrame2());
+            out.push_back(it->GetReferenceKeyFrame()->GetTranslation());
+        }
+        return out;
+    };
+
+    cv::Mat Test() {cv::Mat a; a.push_back(1); return a;};
+
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
+
 
 private:
 

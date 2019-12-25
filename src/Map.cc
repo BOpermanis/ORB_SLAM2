@@ -109,6 +109,19 @@ vector<MapPoint*> Map::GetReferenceMapPoints()
     return mvpReferenceMapPoints;
 }
 
+cv::Mat Map::GetMapCloud(){
+    unique_lock<mutex> lock(mMutexMap);
+    cv::Mat out;
+    MapPoint* it;
+    for(auto it: this->GetAllMapPoints()){
+        if(not it->isBad()){
+            out.push_back(it->GetWorldPos());
+            out.push_back(it->GetReferenceKeyFrame2());
+        }
+    }
+    return out;
+}
+
 long unsigned int Map::GetMaxKFid()
 {
     unique_lock<mutex> lock(mMutexMap);
@@ -117,10 +130,10 @@ long unsigned int Map::GetMaxKFid()
 
 void Map::clear()
 {
-    for(set<MapPoint*>::iterator sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
+    for(auto sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
         delete *sit;
 
-    for(set<KeyFrame*>::iterator sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
+    for(auto sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
         delete *sit;
 
     mspMapPoints.clear();
