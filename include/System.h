@@ -123,14 +123,14 @@ public:
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<KeyFrame*> GetAllKeyFrames();
     std::vector<MapPoint*> GetAllMapPoints();
-//    cv::Mat GetMapCloud() {return mpMap->GetMapCloud();};
+
     cv::Mat GetMapCloud() {
-        cv::Mat out;
         MapPoint* it;
+        cv::Mat out;
         for(auto it: mpMap->GetAllMapPoints()){
             out.push_back(it->GetWorldPos());
-//            out.push_back(it->GetReferenceKeyFrame2());
             out.push_back(it->GetReferenceKeyFrame()->GetTranslation());
+            out.push_back(float(it->GetId()));
         }
         return out;
     };

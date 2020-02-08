@@ -39,6 +39,7 @@ class Frame;
 class MapPoint
 {
 public:
+
     MapPoint(const cv::Mat &Pos, KeyFrame* pRefKF, Map* pMap);
     MapPoint(const cv::Mat &Pos,  Map* pMap, Frame* pFrame, const int &idxF);
 
@@ -77,6 +78,8 @@ public:
 
     void UpdateNormalAndDepth();
 
+    long GetId();
+
     float GetMinDistanceInvariance();
     float GetMaxDistanceInvariance();
     int PredictScale(const float &currentDist, KeyFrame*pKF);
@@ -113,9 +116,12 @@ public:
 
     static std::mutex mGlobalMutex;
 
-protected:    
+protected:
 
-     // Position in absolute coordinates
+    long id;
+    long gid = 0; // added
+//    gid = 0;
+    // Position in absolute coordinates
      cv::Mat mWorldPos;
 
      // Keyframes observing the point and associated index in keyframe
@@ -133,7 +139,6 @@ protected:
      // Tracking counters
      int mnVisible;
      int mnFound;
-     long id;
 
      // Bad flag (we do not currently erase MapPoint from memory)
      bool mbBad;
@@ -146,6 +151,7 @@ protected:
      Map* mpMap;
 
      std::mutex mMutexPos;
+     std::mutex mMutexId;
      std::mutex mMutexFeatures;
 };
 

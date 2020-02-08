@@ -533,6 +533,9 @@
 		<Unit filename="/slamdoom/tmp/orbslam2/src/Viewer.cc">
 			<Option target="ORB_SLAM2"/>
 		</Unit>
+		<Unit filename="/slamdoom/tmp/orbslam2/src/generate_markers.cpp">
+			<Option target="ORB_SLAM2"/>
+		</Unit>
 		<Unit filename="/slamdoom/tmp/orbslam2/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

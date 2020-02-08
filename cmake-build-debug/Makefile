@@ -876,6 +876,33 @@ src/Viewer.cc.s:
 	$(MAKE) -f CMakeFiles/ORB_SLAM2.dir/build.make CMakeFiles/ORB_SLAM2.dir/src/Viewer.cc.s
 .PHONY : src/Viewer.cc.s
 
+src/generate_markers.o: src/generate_markers.cpp.o
+
+.PHONY : src/generate_markers.o
+
+# target to build an object file
+src/generate_markers.cpp.o:
+	$(MAKE) -f CMakeFiles/ORB_SLAM2.dir/build.make CMakeFiles/ORB_SLAM2.dir/src/generate_markers.cpp.o
+.PHONY : src/generate_markers.cpp.o
+
+src/generate_markers.i: src/generate_markers.cpp.i
+
+.PHONY : src/generate_markers.i
+
+# target to preprocess a source file
+src/generate_markers.cpp.i:
+	$(MAKE) -f CMakeFiles/ORB_SLAM2.dir/build.make CMakeFiles/ORB_SLAM2.dir/src/generate_markers.cpp.i
+.PHONY : src/generate_markers.cpp.i
+
+src/generate_markers.s: src/generate_markers.cpp.s
+
+.PHONY : src/generate_markers.s
+
+# target to generate assembly for a file
+src/generate_markers.cpp.s:
+	$(MAKE) -f CMakeFiles/ORB_SLAM2.dir/build.make CMakeFiles/ORB_SLAM2.dir/src/generate_markers.cpp.s
+.PHONY : src/generate_markers.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -966,6 +993,9 @@ help:
 	@echo "... src/Viewer.o"
 	@echo "... src/Viewer.i"
 	@echo "... src/Viewer.s"
+	@echo "... src/generate_markers.o"
+	@echo "... src/generate_markers.i"
+	@echo "... src/generate_markers.s"
 .PHONY : help
 
 

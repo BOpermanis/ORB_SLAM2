@@ -23,6 +23,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/slamdoom/tmp/orbslam2/src/System.cc" "/slamdoom/tmp/orbslam2/cmake-build-debug/CMakeFiles/ORB_SLAM2.dir/src/System.cc.o"
   "/slamdoom/tmp/orbslam2/src/Tracking.cc" "/slamdoom/tmp/orbslam2/cmake-build-debug/CMakeFiles/ORB_SLAM2.dir/src/Tracking.cc.o"
   "/slamdoom/tmp/orbslam2/src/Viewer.cc" "/slamdoom/tmp/orbslam2/cmake-build-debug/CMakeFiles/ORB_SLAM2.dir/src/Viewer.cc.o"
+  "/slamdoom/tmp/orbslam2/src/generate_markers.cpp" "/slamdoom/tmp/orbslam2/cmake-build-debug/CMakeFiles/ORB_SLAM2.dir/src/generate_markers.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

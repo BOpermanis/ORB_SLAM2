@@ -20,6 +20,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/ORB_SLAM2.dir/src/System.cc.o"
   "CMakeFiles/ORB_SLAM2.dir/src/Tracking.cc.o"
   "CMakeFiles/ORB_SLAM2.dir/src/Viewer.cc.o"
+  "CMakeFiles/ORB_SLAM2.dir/src/generate_markers.cpp.o"
 )
 
 # Per-language clean rules from dependency scanning.

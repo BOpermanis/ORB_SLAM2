@@ -29,7 +29,7 @@ namespace ORB_SLAM2
 long unsigned int MapPoint::nNextId=0;
 mutex MapPoint::mGlobalMutex;
 
-MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map* pMap):
+MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map* pMap): id(MapPoint::gid++),
     mnFirstKFid(pRefKF->mnId), mnFirstFrame(pRefKF->mnFrameId), nObs(0), mnTrackReferenceForFrame(0),
     mnLastFrameSeen(0), mnBALocalForKF(0), mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
     mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(pRefKF), mnVisible(1), mnFound(1), mbBad(false),
@@ -43,7 +43,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map* pMap):
     mnId=nNextId++;
 }
 
-MapPoint::MapPoint(const cv::Mat &Pos, Map* pMap, Frame* pFrame, const int &idxF):
+MapPoint::MapPoint(const cv::Mat &Pos, Map* pMap, Frame* pFrame, const int &idxF): id(MapPoint::gid++),
     mnFirstKFid(-1), mnFirstFrame(pFrame->mnId), nObs(0), mnTrackReferenceForFrame(0), mnLastFrameSeen(0),
     mnBALocalForKF(0), mnFuseCandidateForKF(0),mnLoopPointForKF(0), mnCorrectedByKF(0),
     mnCorrectedReference(0), mnBAGlobalForKF(0), mpRefKF(static_cast<KeyFrame*>(NULL)), mnVisible(1),
@@ -154,6 +154,11 @@ int MapPoint::Observations()
     unique_lock<mutex> lock(mMutexFeatures);
     return nObs;
 }
+
+    long MapPoint::GetId() {
+        unique_lock<mutex> lock(mMutexId);
+        return id;
+    }
 
 void MapPoint::SetBadFlag()
 {
