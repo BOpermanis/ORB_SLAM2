@@ -42,6 +42,7 @@ class KeyFrameDatabase;
 
 class KeyFrame
 {
+    static int nr_kf;
 public:
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
 

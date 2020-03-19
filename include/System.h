@@ -130,7 +130,8 @@ public:
         for(auto it: mpMap->GetAllMapPoints()){
             out.push_back(it->GetWorldPos());
             out.push_back(it->GetReferenceKeyFrame()->GetTranslation());
-            out.push_back(float(it->GetId()));
+//            out.push_back(float(it->GetId()));
+            out.push_back(float(it->mnId));
         }
         return out;
     };
