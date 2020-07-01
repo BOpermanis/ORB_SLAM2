@@ -36,9 +36,11 @@
 #include"ORBextractor.h"
 #include "Initializer.h"
 #include "MapDrawer.h"
-#include "System.h"
+#include"CAPE/capewrap.cpp"
 
+#include "System.h"
 #include <mutex>
+
 
 namespace ORB_SLAM2
 {
@@ -109,6 +111,7 @@ public:
     list<KeyFrame*> mlpReferences;
     list<double> mlFrameTimes;
     list<bool> mlbLost;
+    capewrap* cape;
 
     // True if local mapping is deactivated and we are performing only localization
     bool mbOnlyTracking;
@@ -209,6 +212,8 @@ protected:
 
     //Motion Model
     cv::Mat mVelocity;
+
+    cv::Mat_<cv::Vec3b> img_plane_seg;
 
     //Color order (true RGB, false BGR, ignored if grayscale)
     bool mbRGB;

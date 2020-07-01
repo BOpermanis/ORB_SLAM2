@@ -68,7 +68,9 @@ src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
-        src/generate_markers.cpp)
+        src/generate_markers.cpp
+        CAPE/CAPE.cpp CAPE/CAPE.h CAPE/capewrap.cpp  CAPE/CylinderSeg.cpp  CAPE/CylinderSeg.h  CAPE/Histogram.cpp  CAPE/Histogram.h  CAPE/Params.h  CAPE/PlaneSeg.cpp  CAPE/PlaneSeg.h
+        )
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}

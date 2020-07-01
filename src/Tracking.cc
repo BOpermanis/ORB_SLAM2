@@ -31,7 +31,7 @@
 #include"Converter.h"
 #include"Map.h"
 #include"Initializer.h"
-
+#include "CAPE/capewrap.cpp"
 #include"Optimizer.h"
 #include"PnPsolver.h"
 
@@ -101,7 +101,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     cout << "- p2: " << DistCoef.at<float>(3) << endl;
     cout << "- fps: " << fps << endl;
 
-
+    cape = new capewrap(fSettings);
     int nRGB = fSettings["Camera.RGB"];
     mbRGB = nRGB;
 
@@ -228,6 +228,7 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
 
     if((fabs(mDepthMapFactor-1.0f)>1e-5) || imDepth.type()!=CV_32F)
         imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
+    img_plane_seg = cape->process(mImGray, imDepth, cv::Mat(), cv::Mat(), false);
 
     mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 

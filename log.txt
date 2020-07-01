@@ -1,0 +1,55 @@
+-- The C compiler identification is GNU 7.5.0
+-- The CXX compiler identification is GNU 7.5.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test COMPILER_SUPPORTS_CXX11
+-- Performing Test COMPILER_SUPPORTS_CXX11 - Success
+-- Performing Test COMPILER_SUPPORTS_CXX0X
+-- Performing Test COMPILER_SUPPORTS_CXX0X - Success
+-- Using flag -std=c++11.
+-- Found Eigen3: /usr/local/include/eigen (Required is at least version "3.1.0") 
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /slamdoom/tmp/orbslam2/build
+Scanning dependencies of target cape_offline
+[  2%] Building CXX object CMakeFiles/cape_offline.dir/CAPE/run_cape_offline.cpp.o
+[  5%] Building CXX object CMakeFiles/cape_offline.dir/CAPE/Histogram.cpp.o
+[  7%] Building CXX object CMakeFiles/cape_offline.dir/CAPE/CAPE.cpp.o
+[ 10%] Building CXX object CMakeFiles/cape_offline.dir/CAPE/CylinderSeg.cpp.o
+[ 12%] Building CXX object CMakeFiles/cape_offline.dir/CAPE/PlaneSeg.cpp.o
+Scanning dependencies of target ORB_SLAM2
+[ 15%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/MapPoint.cc.o
+[ 17%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/LoopClosing.cc.o
+[ 20%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/ORBmatcher.cc.o
+[ 23%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/MapDrawer.cc.o
+[ 25%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/FrameDrawer.cc.o
+[ 28%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/ORBextractor.cc.o
+[ 30%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/KeyFrame.cc.o
+[ 33%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/Converter.cc.o
+[ 35%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/LocalMapping.cc.o
+[ 38%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/Tracking.cc.o
+[ 41%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/PnPsolver.cc.o
+[ 43%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/Frame.cc.o
+[ 46%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/System.cc.o
+[ 48%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/generate_markers.cpp.o
+[ 51%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/Optimizer.cc.o
+[ 53%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/Viewer.cc.o
+[ 56%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/Sim3Solver.cc.o
+[ 58%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/Initializer.cc.o
+[ 61%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/KeyFrameDatabase.cc.o
+[ 64%] Building CXX object CMakeFiles/ORB_SLAM2.dir/src/Map.cc.o
+CMakeFiles/cape_offline.dir/build.make:62: recipe for target 'CMakeFiles/cape_offline.dir/CAPE/run_cape_offline.cpp.o' failed
+CMakeFiles/Makefile2:104: recipe for target 'CMakeFiles/cape_offline.dir/all' failed
+[ 66%] Linking CXX shared library ../lib/libORB_SLAM2.so
+[ 66%] Built target ORB_SLAM2
+Makefile:83: recipe for target 'all' failed
