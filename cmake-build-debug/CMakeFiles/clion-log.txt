@@ -1,6 +1,0 @@
-/home/slam_data/clion-2019.3.1/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /slamdoom/tmp/orbslam2
-Build type: Debug
--- Using flag -std=c++11.
--- Configuring done
--- Generating done
--- Build files have been written to: /slamdoom/tmp/orbslam2/cmake-build-debug
