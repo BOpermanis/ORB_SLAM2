@@ -388,9 +388,13 @@ ORB_SLAM2_EXTERNAL_OBJECTS =
 ../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libGLU.so
 ../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libGL.so
 ../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libGLEW.so
-../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libwayland-client.so
-../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libwayland-egl.so
-../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libwayland-cursor.so
+../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libSM.so
+../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libICE.so
+../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libX11.so
+../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libXext.so
+../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libGLU.so
+../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libGL.so
+../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libGLEW.so
 ../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libSM.so
 ../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libICE.so
 ../lib/libORB_SLAM2.so: /usr/lib/x86_64-linux-gnu/libX11.so

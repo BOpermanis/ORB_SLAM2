@@ -102,9 +102,13 @@ stereo_euroc_EXTERNAL_OBJECTS =
 ../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libGLU.so
 ../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libGL.so
 ../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libGLEW.so
-../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libwayland-client.so
-../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libwayland-egl.so
-../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libwayland-cursor.so
+../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libSM.so
+../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libICE.so
+../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libX11.so
+../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libXext.so
+../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libGLU.so
+../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libGL.so
+../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libGLEW.so
 ../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libSM.so
 ../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libICE.so
 ../Examples/Stereo/stereo_euroc: /usr/lib/x86_64-linux-gnu/libX11.so

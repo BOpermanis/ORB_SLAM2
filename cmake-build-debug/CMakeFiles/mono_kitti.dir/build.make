@@ -102,9 +102,13 @@ mono_kitti_EXTERNAL_OBJECTS =
 ../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libGLU.so
 ../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libGL.so
 ../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libGLEW.so
-../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libwayland-client.so
-../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libwayland-egl.so
-../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libwayland-cursor.so
+../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libSM.so
+../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libICE.so
+../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libX11.so
+../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libXext.so
+../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libGLU.so
+../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libGL.so
+../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libGLEW.so
 ../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libSM.so
 ../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libICE.so
 ../Examples/Monocular/mono_kitti: /usr/lib/x86_64-linux-gnu/libX11.so

@@ -102,9 +102,13 @@ rgbd_tum_EXTERNAL_OBJECTS =
 ../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libGLU.so
 ../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libGL.so
 ../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libGLEW.so
-../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libwayland-client.so
-../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libwayland-egl.so
-../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libwayland-cursor.so
+../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libSM.so
+../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libICE.so
+../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libX11.so
+../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libXext.so
+../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libGLU.so
+../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libGL.so
+../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libGLEW.so
 ../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libSM.so
 ../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libICE.so
 ../Examples/RGB-D/rgbd_tum: /usr/lib/x86_64-linux-gnu/libX11.so
