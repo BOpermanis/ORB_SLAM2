@@ -5,8 +5,8 @@
       <config projectName="ORB_SLAM2" targetName="stereo_euroc" />
       <config projectName="ORB_SLAM2" targetName="rgbd_tum" />
       <config projectName="ORB_SLAM2" targetName="mono_euroc" />
-      <config projectName="ORB_SLAM2" targetName="mono_tum" />
       <config projectName="ORB_SLAM2" targetName="stereo_kitti" />
+      <config projectName="ORB_SLAM2" targetName="mono_tum" />
       <config projectName="ORB_SLAM2" targetName="mono_kitti" />
       <config projectName="ORB_SLAM2" targetName="ORB_SLAM2" />
     </generated>
@@ -18,22 +18,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="11d16895-9e55-41fd-8879-29d2b0c3b4d8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/CAPE/CAPE.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/CAPE.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/CAPE.sln" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/CAPE.v11.suo" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/CMakeLists.txt.backup" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/CylinderSeg.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/CylinderSeg.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/Histogram.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/Histogram.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/Params.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/PlaneSeg.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/PlaneSeg.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CAPE/capewrap.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CAPE/capewrap.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CAPE/capewrap.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/Tracking.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/Tracking.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Tracking.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/Tracking.cc" afterDir="false" />
     </list>
@@ -45,16 +31,22 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1e5S1sZXQ7xtYBGhvPVNhWdgerH" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/CMakeLists.txt" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
-  <component name="RunManager" selected="CMake Application.mono_euroc">
+  <component name="RunManager" selected="Shell Script.build.sh">
     <configuration name="ORB_SLAM2" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ORB_SLAM2" TARGET_NAME="ORB_SLAM2" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -90,15 +82,29 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="build.sh" type="ShConfigurationType" temporary="true">
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build.sh" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="INTERPRETER_PATH" value="/bin/bash" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <method v="2" />
+    </configuration>
     <list>
+      <item itemvalue="CMake Application.ORB_SLAM2" />
       <item itemvalue="CMake Application.mono_euroc" />
       <item itemvalue="CMake Application.mono_kitti" />
       <item itemvalue="CMake Application.mono_tum" />
-      <item itemvalue="CMake Application.ORB_SLAM2" />
       <item itemvalue="CMake Application.rgbd_tum" />
       <item itemvalue="CMake Application.stereo_euroc" />
       <item itemvalue="CMake Application.stereo_kitti" />
+      <item itemvalue="Shell Script.build.sh" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Shell Script.build.sh" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -123,10 +129,23 @@
       <option name="presentableId" value="Default" />
       <updated>1593609750080</updated>
       <workItem from="1593609758917" duration="13000" />
+      <workItem from="1593678823488" duration="344000" />
+      <workItem from="1593679169542" duration="5732000" />
     </task>
     <servers />
   </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
   <component name="WindowStateProjectService">
+    <state x="660" y="223" width="530" height="596" key="FileChooserDialogImpl" timestamp="1593679163281">
+      <screen x="0" y="31" width="1855" height="976" />
+    </state>
+    <state x="660" y="223" width="530" height="596" key="FileChooserDialogImpl/0.31.1855.976@0.31.1855.976" timestamp="1593679163281" />
+    <state x="300" y="68" width="1254" height="907" key="SettingsEditor" timestamp="1593679147707">
+      <screen x="0" y="31" width="1855" height="976" />
+    </state>
+    <state x="300" y="68" width="1254" height="907" key="SettingsEditor/0.31.1855.976@0.31.1855.976" timestamp="1593679147707" />
     <state x="593" y="348" key="com.intellij.ide.util.TipDialog" timestamp="1593609760951">
       <screen x="0" y="31" width="1855" height="976" />
     </state>

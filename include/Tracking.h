@@ -213,8 +213,6 @@ protected:
     //Motion Model
     cv::Mat mVelocity;
 
-    cv::Mat_<cv::Vec3b> img_plane_seg;
-
     //Color order (true RGB, false BGR, ignored if grayscale)
     bool mbRGB;
 

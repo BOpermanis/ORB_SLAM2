@@ -23,10 +23,25 @@
 
 using namespace std;
 
+class cape_output {
+public:
+    int nr_planes, nr_cylinders;
+    cv::Mat_<uchar> seg_output;
+    vector<PlaneSeg> plane_params;
+    vector<CylinderSeg> cylinder_params;
+    cape_output(int nr_planes1, int nr_cylinders1, cv::Mat_<uchar> &seq_output1, vector<PlaneSeg> &plane_params1, vector<CylinderSeg> &cylinder_params1){
+        nr_planes = nr_planes1;
+        nr_cylinders = nr_cylinders1;
+        seg_output = seq_output1;
+        plane_params = plane_params1;
+        cylinder_params = cylinder_params1;
+    }
+};
+
 class capewrap {
 public:
     void projectPointCloud(cv::Mat &X, cv::Mat &Y, cv::Mat &Z, cv::Mat &U, cv::Mat &V, float fx_rgb, float fy_rgb, float cx_rgb,
-                           float cy_rgb, double z_min, Eigen::MatrixXf &cloud_array) {
+                           float cy_rgb, Eigen::MatrixXf &cloud_array) {
 
         int width = X.cols;
         int height = X.rows;
@@ -52,7 +67,7 @@ public:
                 z = sz[c];
                 u = u_ptr[c];
                 v = v_ptr[c];
-                if (z > z_min && u > 0 && v > 0 && u < width && v < height) {
+                if (u > 0 && v > 0 && u < width && v < height) {
                     id = floor(v) * width + u;
                     cloud_array(id, 0) = sx[c];
                     cloud_array(id, 1) = sy[c];
@@ -97,14 +112,13 @@ public:
 
     float fx_ir, fy_ir, cx_ir, cy_ir, fx_rgb, fy_rgb, cx_rgb, cy_rgb;
     int width, height;
-    cv::Mat rgb_img, d_img;
+    cv::Mat d_img;
     // d_img.convertTo(d_img, CV_32F);
 
     cv::Mat_<float> X, Y, X_t, Y_t, X_pre, Y_pre, U, V;
     Eigen::MatrixXf cloud_array, cloud_array_organized;
 
     capewrap(cv::FileStorage fSettings) {
-
         for (int i = 0; i < 100; i++) {
             cv::Vec3b color;
             color[0] = rand() % 255;
@@ -112,7 +126,6 @@ public:
             color[2] = rand() % 255;
             color_code.push_back(color);
         }
-
         // Add specific colors for planes
         color_code[0][0] = 0;
         color_code[0][1] = 0;
@@ -140,7 +153,6 @@ public:
         color_code[53][1] = 0;
         color_code[53][2] = 255;
 
-
         // Get intrinsics
         fx_ir = fSettings["Camera.fx"];
         fy_ir = fSettings["Camera.fy"];
@@ -153,10 +165,24 @@ public:
         width  = fSettings["Camera.width"];
         height = fSettings["Camera.height"];
 
-
+        X = cv::Mat_<float>(height, width);
+        Y = cv::Mat_<float>(height, width);
+        X_pre = cv::Mat_<float>(height, width);
+        Y_pre = cv::Mat_<float>(height, width);
+        U = cv::Mat_<float>(height, width);
+        V = cv::Mat_<float>(height, width);
+        X_t = cv::Mat_<float>(height, width);
+        Y_t = cv::Mat_<float>(height, width);
+        cloud_array = Eigen::MatrixXf(width * height, 3);
+        cloud_array_organized = Eigen::MatrixXf(width * height, 3);
+        cv::Mat_<int> cell_map(height, width);
 
         int nr_horizontal_cells = width / PATCH_SIZE;
         int nr_vertical_cells = height / PATCH_SIZE;
+
+        cv::Size s = X_pre.size();
+
+        cout << "h " << s.height << " w " << s.width << " h1 " << height << " w1 " << width << endl;
 
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
@@ -165,7 +191,6 @@ public:
                 Y_pre.at<float>(r, c) = (r - cy_ir) / fy_ir;
             }
         }
-
         // Pre-computations for maping an image point cloud to a cache-friendly array where cell's local point clouds are contiguous
         cell_map = cv::Mat_<int>(height, width);
 
@@ -180,25 +205,12 @@ public:
             }
         }
 
-        X = cv::Mat_<float>(height, width);
-        Y = cv::Mat_<float>(height, width);
-        X_pre = cv::Mat_<float>(height, width);
-        Y_pre = cv::Mat_<float>(height, width);
-
-        U = cv::Mat_<float>(height, width);
-        V = cv::Mat_<float>(height, width);
-        X_t = cv::Mat_<float>(height, width);
-        Y_t = cv::Mat_<float>(height, width);
-        cloud_array = Eigen::MatrixXf(width * height, 3);
-        cloud_array_organized = Eigen::MatrixXf(width * height, 3);
-        cv::Mat_<int> cell_map(height, width);
-
         plane_detector = new CAPE(height, width, PATCH_SIZE, PATCH_SIZE, cylinder_detection, COS_ANGLE_MAX, MAX_MERGE_DIST);
     }
 
-    cv::Mat_<cv::Vec3b> process(const cv::Mat &imRGB, const cv::Mat &imD, const cv::Mat &R_stereo, const cv::Mat &t_stereo, bool flag_rotate=false) {
-        rgb_img = imRGB;
-        d_img = imD;
+    cape_output process(const cv::Mat &imRGB, const cv::Mat &imD, const cv::Mat &R_stereo, const cv::Mat &t_stereo, bool flag_rotate=false) {
+//        rgb_img = imRGB.clone();
+        d_img = imD.clone();
         // Populate with random color codes
 
         // Initialize CAPE
@@ -210,18 +222,9 @@ public:
 
         // The following transformation+projection is only necessary to visualize RGB with overlapped segments
         // Transform point cloud to color reference frame
-        if (flag_rotate) {
-            X_t = ((float) R_stereo.at<double>(0, 0)) * X + ((float) R_stereo.at<double>(0, 1)) * Y +
-                  ((float) R_stereo.at<double>(0, 2)) * d_img + (float) t_stereo.at<double>(0);
-            Y_t = ((float) R_stereo.at<double>(1, 0)) * X + ((float) R_stereo.at<double>(1, 1)) * Y +
-                  ((float) R_stereo.at<double>(1, 2)) * d_img + (float) t_stereo.at<double>(1);
-            d_img = ((float) R_stereo.at<double>(2, 0)) * X + ((float) R_stereo.at<double>(2, 1)) * Y +
-                    ((float) R_stereo.at<double>(2, 2)) * d_img + (float) t_stereo.at<double>(2);
-        }
 
-        projectPointCloud(X_t, Y_t, d_img, U, V, fx_rgb, fy_rgb, cx_rgb, cy_rgb, t_stereo.at<double>(2), cloud_array);
+        projectPointCloud(X_t, Y_t, d_img, U, V, fx_rgb, fy_rgb, cx_rgb, cy_rgb, cloud_array);
 
-        cv::Mat_<cv::Vec3b> seg_rz = cv::Mat_<cv::Vec3b>(height, width, cv::Vec3b(0, 0, 0));
         cv::Mat_<uchar> seg_output = cv::Mat_<uchar>(height, width, uchar(0));
 
         // Run CAPE
@@ -231,49 +234,7 @@ public:
         organizePointCloudByCell(cloud_array, cloud_array_organized, cell_map);
         plane_detector->process(cloud_array_organized, nr_planes, nr_cylinders, seg_output, plane_params,
                                 cylinder_params);
-
-        // Map segments with color codes and overlap segmented image w/ RGB
-        uchar *sCode;
-        uchar *dColor;
-        uchar *srgb;
-        int code;
-        for (int r = 0; r < height; r++) {
-            dColor = seg_rz.ptr<uchar>(r);
-            sCode = seg_output.ptr<uchar>(r);
-            srgb = rgb_img.ptr<uchar>(r);
-            for (int c = 0; c < width; c++) {
-                code = *sCode;
-                if (code > 0) {
-                    dColor[c * 3] = color_code[code - 1][0] / 2 + srgb[0] / 2;
-                    dColor[c * 3 + 1] = color_code[code - 1][1] / 2 + srgb[1] / 2;
-                    dColor[c * 3 + 2] = color_code[code - 1][2] / 2 + srgb[2] / 2;;
-                } else {
-                    dColor[c * 3] = srgb[0];
-                    dColor[c * 3 + 1] = srgb[1];
-                    dColor[c * 3 + 2] = srgb[2];
-                }
-                sCode++;
-                srgb++;
-                srgb++;
-                srgb++;
-            }
-        }
-
-        // Show frame rate and labels
-        int cylinder_code_offset = 50;
-        // show cylinder labels
-        if (nr_cylinders > 0) {
-            std::stringstream text;
-            cv::putText(seg_rz, text.str(), cv::Point(width / 2, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                        cv::Scalar(255, 255, 255, 1));
-            for (int j = 0; j < nr_cylinders; j++) {
-                cv::rectangle(seg_rz, cv::Point(width / 2 + 80 + 15 * j, 6), cv::Point(width / 2 + 90 + 15 * j, 16),
-                              cv::Scalar(color_code[cylinder_code_offset + j][0],
-                                         color_code[cylinder_code_offset + j][1],
-                                         color_code[cylinder_code_offset + j][2]), -1);
-            }
-        }
-        return seg_rz;
+        return cape_output(nr_planes, nr_cylinders, seg_output, plane_params, cylinder_params);
     }
 };
 
