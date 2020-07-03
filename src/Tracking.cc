@@ -229,9 +229,9 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
     if((fabs(mDepthMapFactor-1.0f)>1e-5) || imDepth.type()!=CV_32F)
         imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
 
-//    auto cape_plates = cape->process(imDepth);
-//    cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
-//    cape->visualize(imRGB, cape_plates);
+    auto cape_plates = cape->process(imDepth);
+    cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
+    cape->visualize(imRGB, cape_plates);
 
     mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 

@@ -226,12 +226,7 @@ int main(int argc, char ** argv){
         cv::Mat_<uchar> seg_output = cv::Mat_<uchar>(height,width,uchar(0));
 
         // Get intrinsics
-
-        loadCalibParameters1("/CAPE/Data/seq_example/calib_params.xml", K_rgb, dist_coeffs_rgb, K_ir, dist_coeffs_ir, R_stereo, t_stereo);
-
-        cout << R_stereo << endl;
-        cout << t_stereo << endl;
-        auto output = plane_detector.process(d_img, R_stereo, t_stereo);
+        auto output = plane_detector.process(d_img);
 
         // Map segments with color codes and overlap segmented image w/ RGB
         uchar * sCode;

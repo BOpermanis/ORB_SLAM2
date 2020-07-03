@@ -110,7 +110,7 @@ public:
     int PATCH_SIZE = 20;
     cv::Mat_<int> cell_map;
 
-//    float fx_ir, fy_ir, cx_ir, cy_ir, fx_rgb, fy_rgb, cx_rgb, cy_rgb;
+    float fx_ir, fy_ir, cx_ir, cy_ir, fx_rgb, fy_rgb, cx_rgb, cy_rgb;
     int width, height;
     cv::Mat d_img;
     // d_img.convertTo(d_img, CV_32F);
@@ -155,9 +155,7 @@ public:
         }
     }
 
-    void _capewrap(std::map<string, float> fSetting1){
-        cv::Mat K_rgb, K_ir, dist_coeffs_rgb, dist_coeffs_ir, R_stereo, t_stereo;
-        loadCalibParameters("/CAPE/Data/seq_example/calib_params.xml", K_rgb, dist_coeffs_rgb, K_ir, dist_coeffs_ir, R_stereo, t_stereo);
+    void _capewrap(std::map<string, float> fSettings){
         for (int i = 0; i < 100; i++) {
             cv::Vec3b color;
             color[0] = rand() % 255;
@@ -192,24 +190,17 @@ public:
         color_code[53][1] = 0;
         color_code[53][2] = 255;
 
-        float fx_ir = K_ir.at<double>(0,0); float fy_ir = K_ir.at<double>(1,1);
-        float cx_ir = K_ir.at<double>(0,2); float cy_ir = K_ir.at<double>(1,2);
-        float fx_rgb = K_rgb.at<double>(0,0); float fy_rgb = K_rgb.at<double>(1,1);
-        float cx_rgb = K_rgb.at<double>(0,2); float cy_rgb = K_rgb.at<double>(1,2);
-        width = 640;
-        height = 480;
-
         // Get intrinsics
-//        fx_ir = fSettings["Camera.fx"];
-//        fy_ir = fSettings["Camera.fy"];
-//        cx_ir = fSettings["Camera.cx"];
-//        cy_ir = fSettings["Camera.cy"];
-//        fx_rgb = fSettings["Camera.fx"];
-//        fy_rgb = fSettings["Camera.fy"];
-//        cx_rgb = fSettings["Camera.cx"];
-//        cy_rgb = fSettings["Camera.cy"];
-//        width  = int(fSettings["Camera.width"]);
-//        height = int(fSettings["Camera.height"]);
+        fx_ir = fSettings["Camera.fx"];
+        fy_ir = fSettings["Camera.fy"];
+        cx_ir = fSettings["Camera.cx"];
+        cy_ir = fSettings["Camera.cy"];
+        fx_rgb = fSettings["Camera.fx"];
+        fy_rgb = fSettings["Camera.fy"];
+        cx_rgb = fSettings["Camera.cx"];
+        cy_rgb = fSettings["Camera.cy"];
+        width  = int(fSettings["Camera.width"]);
+        height = int(fSettings["Camera.height"]);
 
         X = cv::Mat_<float>(height, width);
         Y = cv::Mat_<float>(height, width);
@@ -221,7 +212,6 @@ public:
         Y_t = cv::Mat_<float>(height, width);
         cloud_array = Eigen::MatrixXf(width * height, 3);
         cloud_array_organized = Eigen::MatrixXf(width * height, 3);
-//        cv::Mat_<int> cell_map(height, width);
 
         int nr_horizontal_cells = width / PATCH_SIZE;
         int nr_vertical_cells = height / PATCH_SIZE;
@@ -254,7 +244,7 @@ public:
         plane_detector = new CAPE(height, width, PATCH_SIZE, PATCH_SIZE, cylinder_detection, COS_ANGLE_MAX, MAX_MERGE_DIST);
     }
 
-    cape_output process(const cv::Mat &imD, cv::Mat R_stereo, cv::Mat t_stereo) {
+    cape_output process(const cv::Mat &imD) {
 //        rgb_img = imRGB.clone();
         d_img = imD.clone();
         // Populate with random color codes
@@ -266,22 +256,13 @@ public:
         Y = Y_pre.mul(d_img);
         cloud_array.setZero();
 
-        X_t = ((float)R_stereo.at<double>(0,0))*X+((float)R_stereo.at<double>(0,1))*Y+((float)R_stereo.at<double>(0,2))*d_img + (float)t_stereo.at<double>(0);
-        Y_t = ((float)R_stereo.at<double>(1,0))*X+((float)R_stereo.at<double>(1,1))*Y+((float)R_stereo.at<double>(1,2))*d_img + (float)t_stereo.at<double>(1);
-        d_img = ((float)R_stereo.at<double>(2,0))*X+((float)R_stereo.at<double>(2,1))*Y+((float)R_stereo.at<double>(2,2))*d_img + (float)t_stereo.at<double>(2);
+        X_t = ((float)1.0)*X;
+        Y_t = ((float)1.0)*Y;
+        d_img = ((float)1.0)*d_img;
 
-        double min, max;
-        cv::minMaxLoc(d_img, &min, &max);
-        cout << "d_img min max " << min << " " << max << endl;
         // The following transformation+projection is only necessary to visualize RGB with overlapped segments
         // Transform point cloud to color reference frame
 
-        cv::Mat K_rgb, K_ir, dist_coeffs_rgb, dist_coeffs_ir;
-        loadCalibParameters("/CAPE/Data/seq_example/calib_params.xml", K_rgb, dist_coeffs_rgb, K_ir, dist_coeffs_ir, R_stereo, t_stereo);
-        float fx_ir = K_ir.at<double>(0,0); float fy_ir = K_ir.at<double>(1,1);
-        float cx_ir = K_ir.at<double>(0,2); float cy_ir = K_ir.at<double>(1,2);
-        float fx_rgb = K_rgb.at<double>(0,0); float fy_rgb = K_rgb.at<double>(1,1);
-        float cx_rgb = K_rgb.at<double>(0,2); float cy_rgb = K_rgb.at<double>(1,2);
         projectPointCloud(X_t, Y_t, d_img, U, V, fx_rgb, fy_rgb, cx_rgb, cy_rgb, cloud_array);
 
         cv::Mat_<uchar> seg_output = cv::Mat_<uchar>(height, width, uchar(0));
@@ -290,15 +271,9 @@ public:
         int nr_planes, nr_cylinders;
         vector<PlaneSeg> plane_params;
         vector<CylinderSeg> cylinder_params;
-        cout << "cloud_array min max " << cloud_array.minCoeff() << " " << cloud_array.maxCoeff() << endl;
 
-        double min1, max1;
-        cv::minMaxLoc(cell_map, &min1, &max1);
-        cout << "cell_map min max " << min1 << " " << max1 << endl;
         organizePointCloudByCell(cloud_array, cloud_array_organized, cell_map);
 
-//        cout << "cloud_array_organized.size() " << cloud_array_organized.rows() << " " << cloud_array_organized.cols() << endl;
-        cout << "cloud_array_organized min max " << cloud_array_organized.minCoeff() << " " << cloud_array_organized.maxCoeff() << endl;
         plane_detector->process(cloud_array_organized, nr_planes, nr_cylinders, seg_output, plane_params,
                                 cylinder_params);
         return cape_output(nr_planes, nr_cylinders, seg_output, plane_params, cylinder_params);
