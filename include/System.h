@@ -124,6 +124,9 @@ public:
     std::vector<KeyFrame*> GetAllKeyFrames();
     std::vector<MapPoint*> GetAllMapPoints();
 
+
+    void PrepareDump();
+
     cv::Mat GetMapCloud() {
         MapPoint* it;
         cv::Mat out;
@@ -140,6 +143,10 @@ public:
 
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
+    cv::Mat dump_kf_ids_from_mps(){return kf_ids_from_mps;}
+    cv::Mat dump_kf_ids(){return kf_ids;}
+    cv::Mat dump_mp_3dpts(){return mp_3dpts;}
+    cv::Mat dump_kf_3dpts(){return kf_3dpts;}
 
 private:
 
@@ -193,6 +200,15 @@ private:
     std::vector<MapPoint*> mTrackedMapPoints;
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
+
+
+    // stuff for export
+    cv::Mat kf_ids_from_mps;
+    cv::Mat kf_ids;
+
+    cv::Mat mp_3dpts;
+    cv::Mat kf_3dpts;
+
 };
 
 }// namespace ORB_SLAM

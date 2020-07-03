@@ -78,8 +78,6 @@ public:
 
     void UpdateNormalAndDepth();
 
-    long GetId();
-
     float GetMinDistanceInvariance();
     float GetMaxDistanceInvariance();
     int PredictScale(const float &currentDist, KeyFrame*pKF);
@@ -113,6 +111,7 @@ public:
     cv::Mat mPosGBA;
     long unsigned int mnBAGlobalForKF;
 
+    long GetId();
 
     static std::mutex mGlobalMutex;
 

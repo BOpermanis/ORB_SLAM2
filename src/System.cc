@@ -504,4 +504,26 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
     return mTrackedKeyPointsUn;
 }
 
+void System::PrepareDump(){
+
+    for(auto it: mpMap->GetAllMapPoints()){
+        cv::Vec3f vec = it->GetWorldPos();
+        long unsigned int id_kf = it->GetReferenceKeyFrame()->mnId;
+
+        mp_3dpts.push_back(vec);
+        kf_ids_from_mps.push_back(id_kf);
+    }
+
+    for(auto it: mpMap->GetAllKeyFrames()){
+
+        cv::Vec3f vec = it->GetTranslation();
+        long unsigned int id_kf = it->mnId;
+
+        kf_3dpts.push_back(vec);
+        kf_ids.push_back(id_kf);
+    }
+
+}
+
+
 } //namespace ORB_SLAM
