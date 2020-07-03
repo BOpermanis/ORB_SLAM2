@@ -113,3 +113,11 @@ add_executable(mono_euroc
 Examples/Monocular/mono_euroc.cc)
 target_link_libraries(mono_euroc ${PROJECT_NAME})
 
+add_executable(cape_offline
+        CAPE/run_cape_offline.cpp
+        CAPE/CAPE.cpp
+        CAPE/PlaneSeg.cpp
+        CAPE/CylinderSeg.cpp
+        CAPE/Histogram.cpp)
+
+target_link_libraries(cape_offline ${OpenCV_LIBS} ${Eigen_LIBRARIES})
