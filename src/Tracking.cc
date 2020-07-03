@@ -31,7 +31,6 @@
 #include"Converter.h"
 #include"Map.h"
 #include"Initializer.h"
-#include "CAPE/capewrap.cpp"
 #include"Optimizer.h"
 #include"PnPsolver.h"
 
@@ -100,9 +99,6 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     cout << "- p1: " << DistCoef.at<float>(2) << endl;
     cout << "- p2: " << DistCoef.at<float>(3) << endl;
     cout << "- fps: " << fps << endl;
-
-    cape = new capewrap(fSettings);
-//    cv::namedWindow("planes");
 
     int nRGB = fSettings["Camera.RGB"];
     mbRGB = nRGB;
@@ -231,14 +227,8 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
     if((fabs(mDepthMapFactor-1.0f)>1e-5) || imDepth.type()!=CV_32F)
         imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
 
-    auto cape_plates = cape->process(imDepth);
-
-    cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
-//    auto img = cape->visualize(imRGB.clone(), cape_plates);
-//    cv::imshow("planes",img);
-//    cv::waitKey(1);
-
-    mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
+    mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,
+            mK,mDistCoef,mbf,mThDepth, mpSystem->flagPlateDetection);
 
     Track();
 

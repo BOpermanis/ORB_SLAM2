@@ -36,7 +36,6 @@
 #include"ORBextractor.h"
 #include "Initializer.h"
 #include "MapDrawer.h"
-#include"CAPE/capewrap.cpp"
 
 #include "System.h"
 #include <mutex>
@@ -111,7 +110,6 @@ public:
     list<KeyFrame*> mlpReferences;
     list<double> mlFrameTimes;
     list<bool> mlbLost;
-    capewrap* cape;
 
     // True if local mapping is deactivated and we are performing only localization
     bool mbOnlyTracking;

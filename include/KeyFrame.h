@@ -95,6 +95,8 @@ public:
     std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r) const;
     cv::Mat UnprojectStereo(int i);
 
+
+
     // Image
     bool IsInImage(const float &x, const float &y) const;
 
@@ -120,7 +122,7 @@ public:
 
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:
-
+    bool flagPlateDetection;
     static long unsigned int nNextId;
     long unsigned int mnId;
     const long unsigned int mnFrameId;
@@ -188,6 +190,7 @@ public:
     const int mnMaxX;
     const int mnMaxY;
     const cv::Mat mK;
+    cv::Mat depth_image;
 
 
     // The following variables need to be accessed trough a mutex to be thread safe.

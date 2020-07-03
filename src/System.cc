@@ -33,9 +33,10 @@ namespace ORB_SLAM2
 {
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
-               const bool bUseViewer):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false),mbActivateLocalizationMode(false),
+               const bool bUseViewer, const bool bPlateDetection):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false),mbActivateLocalizationMode(false),
         mbDeactivateLocalizationMode(false)
 {
+    flagPlateDetection = bPlateDetection;
     // Output welcome message
     cout << endl <<
     "ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza." << endl <<
@@ -114,6 +115,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     mpLoopCloser->SetTracker(mpTracker);
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
+
+    cape = new capewrap(fsSettings);
 }
 
 cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp)
@@ -504,6 +507,13 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
     return mTrackedKeyPointsUn;
 }
 
+//    auto cape_plates = cape->process(imDepth);
+//
+//    cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
+//    auto img = cape->visualize(imRGB.clone(), cape_plates);
+//    cv::imshow("planes",img);
+//    cv::waitKey(1);
+
 void System::PrepareDump(){
 
     for(auto it: mpMap->GetAllMapPoints()){
@@ -517,6 +527,8 @@ void System::PrepareDump(){
     for(auto it: mpMap->GetAllKeyFrames()){
 
         cv::Vec3f vec = it->GetTranslation();
+        auto cape_plates = cape->process(it->depth_image);
+        cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
         long unsigned int id_kf = it->mnId;
 
         kf_3dpts.push_back(vec);
