@@ -102,6 +102,8 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     cout << "- fps: " << fps << endl;
 
     cape = new capewrap(fSettings);
+//    cv::namedWindow("planes");
+
     int nRGB = fSettings["Camera.RGB"];
     mbRGB = nRGB;
 
@@ -230,8 +232,11 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
         imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
 
     auto cape_plates = cape->process(imDepth);
+
     cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
-    cape->visualize(imRGB, cape_plates);
+//    auto img = cape->visualize(imRGB.clone(), cape_plates);
+//    cv::imshow("planes",img);
+//    cv::waitKey(1);
 
     mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 

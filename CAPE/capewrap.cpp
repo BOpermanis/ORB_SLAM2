@@ -218,7 +218,7 @@ public:
 
         cv::Size s = X_pre.size();
 
-        cout << "h " << s.height << " w " << s.width << " h1 " << height << " w1 " << width << endl;
+//        cout << "h " << s.height << " w " << s.width << " h1 " << height << " w1 " << width << endl;
 
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
@@ -279,7 +279,7 @@ public:
         return cape_output(nr_planes, nr_cylinders, seg_output, plane_params, cylinder_params);
     }
 
-    void visualize(cv::Mat rgb_img, cape_output output){
+    cv::Mat visualize(cv::Mat rgb_img, cape_output output){
 
         // Map segments with color codes and overlap segmented image w/ RGB
         uchar * sCode;
@@ -304,18 +304,8 @@ public:
                 sCode++; srgb++; srgb++; srgb++;
             }
         }
-//        int cylinder_code_offset = 50;
-        // show cylinder labels
-//        if (nr_cylinders>0){
-//            std::stringstream text;
-//            cv::putText(seg_rz, text.str(), cv::Point(width/2,15), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255,255,255,1));
-//            for(int j=0;j<nr_cylinders;j++){
-//                cv::rectangle(seg_rz,  cv::Point(width/2 + 80+15*j,6),cv::Point(width/2 + 90+15*j,16), cv::Scalar(color_code[cylinder_code_offset+j][0],color_code[cylinder_code_offset+j][1],color_code[cylinder_code_offset+j][2]),-1);
-//            }
-//        }
-//        cv::imshow("Seg", seg_rz);
+        return rgb_img;
     }
-
 };
 
 #endif // capewrap_cpp
