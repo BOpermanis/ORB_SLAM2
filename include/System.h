@@ -77,6 +77,8 @@ public:
     // Returns the camera pose (empty if tracking fails).
     cv::Mat TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp);
 
+    cv::Mat VisualizeCape(const cv::Mat &im, const cv::Mat &depthmap);
+
     // Proccess the given monocular frame
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
     // Returns the camera pose (empty if tracking fails).
@@ -151,6 +153,8 @@ public:
     cv::Mat dump_kf_ids(){return kf_ids;}
     cv::Mat dump_mp_3dpts(){return mp_3dpts;}
     cv::Mat dump_kf_3dpts(){return kf_3dpts;}
+    cv::Mat dump_kf_ids_from_planes(){return kf_ids_from_planes;}
+    cv::Mat dump_plane_params(){return plane_params;}
 
 private:
 
@@ -212,6 +216,9 @@ private:
 
     cv::Mat mp_3dpts;
     cv::Mat kf_3dpts;
+
+    cv::Mat kf_ids_from_planes;
+    cv::Mat plane_params;
 
 };
 

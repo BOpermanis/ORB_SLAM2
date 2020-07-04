@@ -170,6 +170,12 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
     return Tcw;
 }
 
+cv::Mat System::VisualizeCape(const cv::Mat &im, const cv::Mat &depthmap) {
+    auto cape_plates = cape->process(depthmap);
+//    cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
+    return cape_plates.seg_output;
+}
+
 cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp)
 {
     if(mSensor!=RGBD)
@@ -516,6 +522,13 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 
 void System::PrepareDump(){
 
+    mp_3dpts.deallocate();
+    kf_ids_from_mps.deallocate();
+    kf_3dpts.deallocate();
+    kf_ids.deallocate();
+    kf_ids_from_planes.deallocate();
+    plane_params.deallocate();
+
     for(auto it: mpMap->GetAllMapPoints()){
         cv::Vec3f vec = it->GetWorldPos();
         long unsigned int id_kf = it->GetReferenceKeyFrame()->mnId;
@@ -528,8 +541,29 @@ void System::PrepareDump(){
 
         cv::Vec3f vec = it->GetTranslation();
         auto cape_plates = cape->process(it->depth_image);
-        cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
+//        cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
         long unsigned int id_kf = it->mnId;
+
+        cv::Mat inv = it->GetPose().inv();
+
+        for(auto it_plane: cape_plates.plane_params){
+            kf_ids_from_planes.push_back(id_kf);
+            cv::Mat param;
+            param.push_back((float)it_plane.normal[0]);
+            param.push_back((float)it_plane.normal[1]);
+            param.push_back((float)it_plane.normal[2]);
+            param.push_back((float)it_plane.d);
+//            cout << "22222" << endl;
+            cv::Mat x = param.t() * inv;
+            plane_params.push_back(x);
+
+//            plane_params.push_back(param);
+//            cv::Size s = inv.size();
+//            cv::Size s1 = param.size();
+//            cv::Size s2 = x.size();
+//            cout << s.height << " " << s.width << " " << s1.height << " " << s1.width << " " << s2.height << " " << s2.width << endl;
+//            break;
+        }
 
         kf_3dpts.push_back(vec);
         kf_ids.push_back(id_kf);
