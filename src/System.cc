@@ -528,6 +528,8 @@ void System::PrepareDump(){
     kf_ids.deallocate();
     kf_ids_from_planes.deallocate();
     plane_params.deallocate();
+    frame_ids.deallocate();
+    plane_segs.deallocate();
 
     for(auto it: mpMap->GetAllMapPoints()){
         cv::Vec3f vec = it->GetWorldPos();
@@ -543,7 +545,8 @@ void System::PrepareDump(){
         auto cape_plates = cape->process(it->depth_image);
 //        cout << "num_plates " << cape_plates.nr_planes << " num_cylinders " << cape_plates.nr_cylinders << endl;
         long unsigned int id_kf = it->mnId;
-
+        plane_segs.push_back(cape_plates.seg_output);
+        frame_ids.push_back(it->mnFrameId);
         cv::Mat inv = it->GetPose().inv();
 
         for(auto it_plane: cape_plates.plane_params){

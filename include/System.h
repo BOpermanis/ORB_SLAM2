@@ -155,6 +155,9 @@ public:
     cv::Mat dump_kf_3dpts(){return kf_3dpts;}
     cv::Mat dump_kf_ids_from_planes(){return kf_ids_from_planes;}
     cv::Mat dump_plane_params(){return plane_params;}
+    cv::Mat dump_frame_ids(){return frame_ids;}
+    cv::Mat dump_plane_segs(){return plane_segs;}
+
 
 private:
 
@@ -213,12 +216,14 @@ private:
     // stuff for export
     cv::Mat kf_ids_from_mps;
     cv::Mat kf_ids;
+    cv::Mat frame_ids;
 
     cv::Mat mp_3dpts;
     cv::Mat kf_3dpts;
 
     cv::Mat kf_ids_from_planes;
     cv::Mat plane_params;
+    cv::Mat plane_segs;
 
 };
 
