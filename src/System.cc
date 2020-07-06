@@ -530,6 +530,7 @@ void System::PrepareDump(){
     plane_params.deallocate();
     frame_ids.deallocate();
     plane_segs.deallocate();
+    kf_clouds.deallocate();
 
     for(auto it: mpMap->GetAllMapPoints()){
         cv::Vec3f vec = it->GetWorldPos();
@@ -547,7 +548,15 @@ void System::PrepareDump(){
         long unsigned int id_kf = it->mnId;
         plane_segs.push_back(cape_plates.seg_output);
         frame_ids.push_back(it->mnFrameId);
-        cv::Mat inv = it->GetPose().inv();
+        cv::Mat Tcw = it->GetPose();
+        cv::Mat inv = Tcw.inv();
+        cv::Mat cloud = cape->get_cloud().t();
+        cv::Mat ones = cv::Mat::ones(1, cloud.cols, cloud.type());
+//        cout << "ones " << ones.cols << " " << ones.rows << " " << ones.type() << endl;
+//        cout << "cloud " << cloud.cols << " " << cloud.rows << " " << cloud.type() << endl;
+        cloud.push_back(ones);
+        cloud = cloud.t() * Tcw;
+        kf_clouds.push_back(cloud);
 
         for(auto it_plane: cape_plates.plane_params){
             kf_ids_from_planes.push_back(id_kf);
@@ -556,16 +565,8 @@ void System::PrepareDump(){
             param.push_back((float)it_plane.normal[1]);
             param.push_back((float)it_plane.normal[2]);
             param.push_back((float)it_plane.d);
-//            cout << "22222" << endl;
             cv::Mat x = param.t() * inv;
             plane_params.push_back(x);
-
-//            plane_params.push_back(param);
-//            cv::Size s = inv.size();
-//            cv::Size s1 = param.size();
-//            cv::Size s2 = x.size();
-//            cout << s.height << " " << s.width << " " << s1.height << " " << s1.width << " " << s2.height << " " << s2.width << endl;
-//            break;
         }
 
         kf_3dpts.push_back(vec);

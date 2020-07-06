@@ -130,7 +130,6 @@ public:
     std::vector<KeyFrame*> GetAllKeyFrames();
     std::vector<MapPoint*> GetAllMapPoints();
 
-
     void PrepareDump();
 
     cv::Mat GetMapCloud() {
@@ -157,7 +156,7 @@ public:
     cv::Mat dump_plane_params(){return plane_params;}
     cv::Mat dump_frame_ids(){return frame_ids;}
     cv::Mat dump_plane_segs(){return plane_segs;}
-
+    cv::Mat dump_kf_clouds(){return kf_clouds;}
 
 private:
 
@@ -225,6 +224,7 @@ private:
     cv::Mat plane_params;
     cv::Mat plane_segs;
 
+    cv::Mat kf_clouds;
 };
 
 }// namespace ORB_SLAM

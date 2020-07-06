@@ -38,6 +38,22 @@ public:
     }
 };
 
+template<typename _Tp, int _rows, int _cols, int _options, int _maxRows, int _maxCols>
+void eigen2cv(const Eigen::Matrix<_Tp, _rows, _cols, _options, _maxRows, _maxCols>& src, cv::Mat& dst)
+{
+    if (!(src.Flags & Eigen::RowMajorBit))
+    {
+        cv::Mat _src(src.cols(), src.rows(), cv::DataType<_Tp>::type,
+                     (void*)src.data(), src.stride() * sizeof(_Tp));
+        cv::transpose(_src, dst);
+    }
+    else
+    {
+        cv::Mat _src(src.rows(), src.cols(), cv::DataType<_Tp>::type,
+                     (void*)src.data(), src.stride() * sizeof(_Tp));
+        _src.copyTo(dst);}
+}
+
 class capewrap {
 public:
     void projectPointCloud(cv::Mat &X, cv::Mat &Y, cv::Mat &Z, cv::Mat &U, cv::Mat &V, float fx_rgb, float fy_rgb, float cx_rgb,
@@ -306,6 +322,12 @@ public:
         }
         return rgb_img;
     }
-};
+
+    cv::Mat get_cloud(){
+        cv::Mat cloud_cv;
+        eigen2cv(cloud_array, cloud_cv);
+        return cloud_cv;
+    }
+        };
 
 #endif // capewrap_cpp
