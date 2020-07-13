@@ -26,6 +26,7 @@
 #include<Eigen/Dense>
 #include"Thirdparty/g2o/g2o/types/types_six_dof_expmap.h"
 #include"Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
+#include "g2oAddition/Plane3D.h"
 
 namespace ORB_SLAM2
 {
@@ -48,7 +49,8 @@ public:
     static Eigen::Matrix<double,3,1> toVector3d(const cv::Mat &cvVector);
     static Eigen::Matrix<double,3,1> toVector3d(const cv::Point3f &cvPoint);
     static Eigen::Matrix<double,3,3> toMatrix3d(const cv::Mat &cvMat3);
-
+    static g2o::Plane3D toPlane3D(const cv::Mat &coe);
+    static cv::Mat toCvMat(const g2o::Plane3D &plane);
     static std::vector<float> toQuaternion(const cv::Mat &M);
 };
 

@@ -36,7 +36,9 @@
 #include "KeyFrameDatabase.h"
 #include "ORBVocabulary.h"
 #include "Viewer.h"
-#include"CAPE/capewrap.cpp"
+#include "CAPE/capewrap.cpp"
+#include "PointCloudMapping.h"
+
 
 namespace ORB_SLAM2
 {
@@ -47,6 +49,7 @@ class Map;
 class Tracking;
 class LocalMapping;
 class LoopClosing;
+class PointCloudMapping;
 
 class System
 {
@@ -211,6 +214,7 @@ private:
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
 
+    shared_ptr<PointCloudMapping>  mpPointCloudMapping;
 
     // stuff for export
     cv::Mat kf_ids_from_mps;

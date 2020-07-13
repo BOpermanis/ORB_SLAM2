@@ -70,8 +70,24 @@ src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
-        src/generate_markers.cpp
-        CAPE/CAPE.cpp CAPE/CAPE.h CAPE/capewrap.cpp  CAPE/CylinderSeg.cpp  CAPE/CylinderSeg.h  CAPE/Histogram.cpp  CAPE/Histogram.h  CAPE/Params.h  CAPE/PlaneSeg.cpp  CAPE/PlaneSeg.h
+        CAPE/CAPE.cpp
+        CAPE/CAPE.h
+        CAPE/capewrap.cpp
+        CAPE/CylinderSeg.cpp
+        CAPE/CylinderSeg.h
+        CAPE/Histogram.cpp
+        CAPE/Histogram.h
+        CAPE/Params.h
+        CAPE/PlaneSeg.cpp
+        CAPE/PlaneSeg.h
+        g2oAddition/VertexPlane.cc
+        g2oAddition/EdgePlane.cc
+        g2oAddition/EdgeParallelPlane.cc
+        g2oAddition/EdgeVerticalPlane.cc
+        g2oAddition/EdgeTwoParPlanes.cc
+        g2oAddition/EdgeTwoParPlanes.h
+        g2oAddition/EdgeTwoVerPlanes.cc
+        g2oAddition/EdgeTwoVerPlanes.h
         )
 
 target_link_libraries(${PROJECT_NAME}
