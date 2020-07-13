@@ -23,6 +23,7 @@
 #include "ORBmatcher.h"
 #include <thread>
 #include <Timer.h>
+
 namespace ORB_SLAM2
 {
 
@@ -66,9 +67,10 @@ Frame::Frame(const Frame &frame)
 
 
 //stereo
-Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, ORBextractor* extractorLeft, ORBextractor* extractorRight, ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth)
-    :mpORBvocabulary(voc),mpORBextractorLeft(extractorLeft),mpORBextractorRight(extractorRight), mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth),
-     mpReferenceKF(static_cast<KeyFrame*>(NULL))
+Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, ORBextractor* extractorLeft, ORBextractor* extractorRight, ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth):
+    mpORBvocabulary(voc),mpORBextractorLeft(extractorLeft),mpORBextractorRight(extractorRight), mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth),
+    mpReferenceKF(static_cast<KeyFrame*>(NULL))
+
 {
     // Frame ID
     mnId=nNextId++;
@@ -183,7 +185,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
     }
 
     AssignFeaturesToGrid();
-}
+
 //    ComputePlanesFromPointCloud(imDepth);
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 

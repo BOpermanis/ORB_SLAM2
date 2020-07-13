@@ -74,7 +74,10 @@ src/Frame.cc
 src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
-src/Viewer.cc
+        src/Viewer.cc
+        src/PointCloudMapping.cc
+        src/Config.cc
+        src/MapPlane.cc
         CAPE/CAPE.cpp
         CAPE/CAPE.h
         CAPE/capewrap.cpp

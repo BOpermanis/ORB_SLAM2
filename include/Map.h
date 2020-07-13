@@ -65,14 +65,11 @@ public:
     void InformNewBigChange();
     int GetLastBigChangeIdx();
 
-    std::vector<KeyFrame*> GetAllKeyFrames();
     std::vector<MapPoint*> GetAllMapPoints();
 
     std::vector<MapPoint*> GetReferenceMapPoints();
     cv::Mat GetMapCloud();
 //    cv::Mat GetMapCloud() {cv::Mat a; a.push_back(1); return a;};
-
-    long unsigned int MapPointsInMap();
 
     void AssociatePlanesByBoundary(Frame &pF, bool out = false);
     void SearchMatchedPlanes(KeyFrame* pKF, cv::Mat Scw, const vector<MapPlane*> &vpPlanes,
@@ -82,8 +79,6 @@ public:
     double PointDistanceFromPlane(const cv::Mat& plane, PointCloud::Ptr boundry, bool out = false);
 
     std::vector<KeyFrame*> GetAllKeyFrames();
-    std::vector<MapPoint*> GetAllMapPoints();
-    std::vector<MapPoint*> GetReferenceMapPoints();
     std::vector<long unsigned int> GetRemovedPlanes();
 
     long unsigned int MapPointsInMap();
