@@ -48,7 +48,6 @@ public:
 
     cv::Mat GetNormal();
     KeyFrame* GetReferenceKeyFrame();
-    cv::Mat GetReferenceKeyFrame2();
 
     std::map<KeyFrame*,size_t> GetObservations();
     int Observations();

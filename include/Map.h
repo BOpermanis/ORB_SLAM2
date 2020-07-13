@@ -23,24 +23,43 @@
 
 #include "MapPoint.h"
 #include "KeyFrame.h"
+#include "MapPlane.h"
 #include <set>
 
 #include <mutex>
+#include <pcl/common/transforms.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/ModelCoefficients.h>
+
 
 namespace ORB_SLAM2
 {
 
 class MapPoint;
 class KeyFrame;
+class MapPlane;
+class Frame;
 
 class Map
 {
 public:
-    Map();
+    typedef pcl::PointXYZRGB PointT;
+    typedef pcl::PointCloud <PointT> PointCloud;
+    Map(const string &strSettingPath);
 
     void AddKeyFrame(KeyFrame* pKF);
     void AddMapPoint(MapPoint* pMP);
+    void AddMapPlane(MapPlane* pMP);
+    void AddNotSeenMapPlane(MapPlane* pMP);
+    void EraseNotSeenMapPlane(MapPlane* pMP);
+
+    std::vector<MapPlane*> GetAllMapPlanes();
+    std::vector<MapPlane*> GetNotSeenMapPlanes();
+
     void EraseMapPoint(MapPoint* pMP);
+    void EraseMapPlane(MapPlane* pMP);
     void EraseKeyFrame(KeyFrame* pKF);
     void SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs);
     void InformNewBigChange();
@@ -54,6 +73,22 @@ public:
 //    cv::Mat GetMapCloud() {cv::Mat a; a.push_back(1); return a;};
 
     long unsigned int MapPointsInMap();
+
+    void AssociatePlanesByBoundary(Frame &pF, bool out = false);
+    void SearchMatchedPlanes(KeyFrame* pKF, cv::Mat Scw, const vector<MapPlane*> &vpPlanes,
+                             vector<MapPlane*> &vpMatched,vector<MapPlane*> &vpMatchedPar,vector<MapPlane*> &vpMatchedVer,
+                             bool out = false);
+
+    double PointDistanceFromPlane(const cv::Mat& plane, PointCloud::Ptr boundry, bool out = false);
+
+    std::vector<KeyFrame*> GetAllKeyFrames();
+    std::vector<MapPoint*> GetAllMapPoints();
+    std::vector<MapPoint*> GetReferenceMapPoints();
+    std::vector<long unsigned int> GetRemovedPlanes();
+
+    long unsigned int MapPointsInMap();
+    long unsigned int MapPlanesInMap();
+    long unsigned int NotSeenMapPlanesInMap();
     long unsigned  KeyFramesInMap();
 
     long unsigned int GetMaxKFid();
@@ -71,7 +106,12 @@ protected:
     std::set<MapPoint*> mspMapPoints;
     std::set<KeyFrame*> mspKeyFrames;
 
+    std::set<MapPlane*> mspNotSeenMapPlanes;
+    std::set<MapPlane*> mspMapPlanes;
+
     std::vector<MapPoint*> mvpReferenceMapPoints;
+
+    std::vector<long unsigned int> mvnRemovedPlanes;
 
     long unsigned int mnMaxKFid;
 
@@ -79,6 +119,12 @@ protected:
     int mnBigChangeIdx;
 
     std::mutex mMutexMap;
+
+    float mfDisTh;
+    float mfAngleTh;
+    float mfVerTh;
+    float mfParTh;
+
 };
 
 } //namespace ORB_SLAM

@@ -1,5 +1,3 @@
-#include<unistd.h>
-
 /**
 * This file is part of ORB-SLAM2.
 *
@@ -37,8 +35,8 @@
 #include<iostream>
 
 #include<mutex>
-
-
+#include <unistd.h>
+#include <Timer.h>
 using namespace std;
 
 namespace ORB_SLAM2
@@ -100,6 +98,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     cout << "- p2: " << DistCoef.at<float>(3) << endl;
     cout << "- fps: " << fps << endl;
 
+
     int nRGB = fSettings["Camera.RGB"];
     mbRGB = nRGB;
 
@@ -146,6 +145,8 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
             mDepthMapFactor = 1.0f/mDepthMapFactor;
     }
 
+    mpPointCloudMapping = make_shared<PointCloudMapping>(mpMap);
+
 }
 
 void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)
@@ -166,6 +167,7 @@ void Tracking::SetViewer(Viewer *pViewer)
 
 cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
 {
+//    clock_t time1 = clock();
     mImGray = imRectLeft;
     cv::Mat imGrayRight = imRectRight;
 
@@ -197,9 +199,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
     }
 
     mCurrentFrame = Frame(mImGray,imGrayRight,timestamp,mpORBextractorLeft,mpORBextractorRight,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
-
     Track();
-
     return mCurrentFrame.mTcw.clone();
 }
 
@@ -207,6 +207,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
 cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp)
 {
     mImGray = imRGB;
+    mImDepth = imD;
     cv::Mat imDepth = imD;
 
     if(mImGray.channels()==3)
@@ -224,13 +225,20 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
             cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
     }
 
-    if((fabs(mDepthMapFactor-1.0f)>1e-5) || imDepth.type()!=CV_32F)
-        imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
 
-    mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,
-            mK,mDistCoef,mbf,mThDepth, mpSystem->flagPlateDetection);
+    if((fabs(mDepthMapFactor-1.0f)>1e-5) || mImDepth.type()!=CV_32F)
+        mImDepth.convertTo(mImDepth,CV_32F,mDepthMapFactor);
+
+
+	mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth, mpSystem->flagPlateDetection);
+
+    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
     Track();
+
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    double tt = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+    ORB_SLAM2::Timer::SetTTrack(tt);
 
     return mCurrentFrame.mTcw.clone();
 }
@@ -347,7 +355,6 @@ void Tracking::Track()
                 else
                 {
                     // In last frame we tracked mainly "visual odometry" points.
-
                     // We compute two camera poses, one from motion model and one doing relocalization.
                     // If relocalization is sucessfull we choose that solution, otherwise we retain
                     // the "visual odometry" solution.
@@ -398,8 +405,10 @@ void Tracking::Track()
         // If we have an initial estimation of the camera pose and matching. Track the local map.
         if(!mbOnlyTracking)
         {
+//            clock_t time1 = clock();
             if(bOK)
                 bOK = TrackLocalMap();
+//            cout<< "Time of track local map : " << 1000*(clock() - time1)/(double)CLOCKS_PER_SEC << "ms" << endl;
         }
         else
         {
@@ -421,6 +430,16 @@ void Tracking::Track()
         // If tracking were good, check if we insert a keyframe
         if(bOK)
         {
+            //Update Planes
+            for (int i = 0; i < mCurrentFrame.mnPlaneNum; ++i) {
+                MapPlane *pMP = mCurrentFrame.mvpMapPlanes[i];
+                if(pMP && pMP->mbSeen){
+                    pMP->UpdateBoundary(mCurrentFrame,i);
+                }else{
+//                    mCurrentFrame.mbNewPlane = true;
+                }
+            }
+
             // Update motion model
             if(!mLastFrame.mTcw.empty())
             {
@@ -509,7 +528,7 @@ void Tracking::Track()
 
 void Tracking::StereoInitialization()
 {
-    if(mCurrentFrame.N>500)
+    if(mCurrentFrame.N>50)
     {
         // Set Frame pose to the origin
         mCurrentFrame.SetPose(cv::Mat::eye(4,4,CV_32F));
@@ -538,7 +557,21 @@ void Tracking::StereoInitialization()
             }
         }
 
-        cout << "New map created with " << mpMap->MapPointsInMap() << " points" << endl;
+//        cout << "New map created with " << mpMap->MapPointsInMap() << " points" << endl;
+
+        for (int i = 0; i < mCurrentFrame.mnPlaneNum; ++i) {
+            cv::Mat p3D = mCurrentFrame.ComputePlaneWorldCoeff(i);
+            MapPlane* pNewMP = new MapPlane(p3D, pKFini, i, mpMap);
+            mpMap->AddMapPlane(pNewMP);
+            pKFini->AddMapPlane(pNewMP, i);
+        }
+
+        for (int i = 0; i < mCurrentFrame.mnNotSeenPlaneNum; ++i) {
+            cv::Mat p3D = mCurrentFrame.ComputeNotSeenPlaneWorldCoeff(i);
+            MapPlane* pNewMP = new MapPlane(p3D, pKFini, i, mpMap, false);
+            mpMap->AddNotSeenMapPlane(pNewMP);
+            pKFini->AddNotSeenMapPlane(pNewMP, i);
+        }
 
         mpLocalMapper->InsertKeyFrame(pKFini);
 
@@ -767,11 +800,14 @@ bool Tracking::TrackReferenceKeyFrame()
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
-    if(nmatches<15)
+    if(nmatches<10)  //15
         return false;
 
     mCurrentFrame.mvpMapPoints = vpMapPointMatches;
     mCurrentFrame.SetPose(mLastFrame.mTcw);
+
+    mpMap->AssociatePlanesByBoundary(mCurrentFrame);
+//    mpMap->AssociatePlanesInFrame(mCurrentFrame);
 
     Optimizer::PoseOptimization(&mCurrentFrame);
 
@@ -796,7 +832,52 @@ bool Tracking::TrackReferenceKeyFrame()
         }
     }
 
-    return nmatchesMap>=10;
+    int nDisgardPlane = 0;
+    for(int i =0; i<mCurrentFrame.mnPlaneNum; i++)
+    {
+        if(mCurrentFrame.mvpMapPlanes[i])
+        {
+            if(mCurrentFrame.mvpMapPlanes[i]!= nullptr && mCurrentFrame.mvbPlaneOutlier[i])
+            {
+                mCurrentFrame.mvpMapPlanes[i]=static_cast<MapPlane*>(NULL);
+                nmatches--;
+                nDisgardPlane++;
+            }
+            else
+                nmatchesMap++;
+        }
+
+        if(mCurrentFrame.mvpParallelPlanes[i])
+        {
+            if(mCurrentFrame.mvbParPlaneOutlier[i])
+            {
+                mCurrentFrame.mvpParallelPlanes[i]=static_cast<MapPlane*>(NULL);
+                mCurrentFrame.mvbParPlaneOutlier[i]=false;
+            }
+        }
+
+        if(mCurrentFrame.mvpVerticalPlanes[i])
+        {
+            if(mCurrentFrame.mvbVerPlaneOutlier[i])
+            {
+                mCurrentFrame.mvpVerticalPlanes[i]=static_cast<MapPlane*>(NULL);
+                mCurrentFrame.mvbVerPlaneOutlier[i]=false;
+            }
+        }
+
+    }
+    for (int i = 0; i < mCurrentFrame.mnNotSeenPlaneNum; ++i) {
+        if (mCurrentFrame.mvpNotSeenMapPlanes[i]) {
+            if (mCurrentFrame.mvbNotSeenPlaneOutlier[i]) {
+                mCurrentFrame.mvpNotSeenMapPlanes[i] = static_cast<MapPlane *>(NULL);
+                mCurrentFrame.mvbNotSeenPlaneOutlier[i] = false;
+            }
+        }
+    }
+
+    if(nDisgardPlane>0)
+
+    return nmatchesMap>=5; //10
 }
 
 void Tracking::UpdateLastFrame()
@@ -892,10 +973,11 @@ bool Tracking::TrackWithMotionModel()
         nmatches = matcher.SearchByProjection(mCurrentFrame,mLastFrame,2*th,mSensor==System::MONOCULAR);
     }
 
-    if(nmatches<20)
+    if(nmatches<10) //20
         return false;
 
-    // Optimize frame pose with all matches
+    mpMap->AssociatePlanesByBoundary(mCurrentFrame);
+
     Optimizer::PoseOptimization(&mCurrentFrame);
 
     // Discard outliers
@@ -917,25 +999,62 @@ bool Tracking::TrackWithMotionModel()
             else if(mCurrentFrame.mvpMapPoints[i]->Observations()>0)
                 nmatchesMap++;
         }
-    }    
+    }
+    int nDisgardPlane = 0;
+    for (int i = 0; i < mCurrentFrame.mnPlaneNum; i++) {
+        if (mCurrentFrame.mvpMapPlanes[i]) {
+            if (mCurrentFrame.mvpMapPlanes[i]!= nullptr && mCurrentFrame.mvbPlaneOutlier[i]) {
+                mCurrentFrame.mvpMapPlanes[i] = static_cast<MapPlane *>(NULL);
+                nmatches--;
+                nDisgardPlane++;
+            } else
+                nmatchesMap++;
+        }
+
+        if (mCurrentFrame.mvpParallelPlanes[i]) {
+            if (mCurrentFrame.mvbParPlaneOutlier[i]) {
+                mCurrentFrame.mvpParallelPlanes[i] = static_cast<MapPlane *>(NULL);
+                mCurrentFrame.mvbParPlaneOutlier[i] = false;
+            }
+        }
+
+        if (mCurrentFrame.mvpVerticalPlanes[i]) {
+            if (mCurrentFrame.mvbVerPlaneOutlier[i]) {
+                mCurrentFrame.mvpVerticalPlanes[i] = static_cast<MapPlane *>(NULL);
+                mCurrentFrame.mvbVerPlaneOutlier[i] = false;
+            }
+        }
+    }
+
+    for (int i = 0; i < mCurrentFrame.mnNotSeenPlaneNum; ++i) {
+        if (mCurrentFrame.mvpNotSeenMapPlanes[i]) {
+            if (mCurrentFrame.mvbNotSeenPlaneOutlier[i]) {
+                mCurrentFrame.mvpNotSeenMapPlanes[i] = static_cast<MapPlane *>(NULL);
+                mCurrentFrame.mvbNotSeenPlaneOutlier[i] = false;
+            }
+        }
+    }
+
+    if(nDisgardPlane>0)
 
     if(mbOnlyTracking)
     {
         mbVO = nmatchesMap<10;
         return nmatches>20;
     }
-
-    return nmatchesMap>=10;
+    return nmatchesMap>=5; //10
 }
 
 bool Tracking::TrackLocalMap()
 {
+//    cout << "Tracking Local Map ..." << endl;
     // We have an estimation of the camera pose and some map points tracked in the frame.
     // We retrieve the local map and try to find matches to points in the local map.
-
     UpdateLocalMap();
 
     SearchLocalPoints();
+
+   mpMap->AssociatePlanesByBoundary(mCurrentFrame);
 
     // Optimize Pose
     Optimizer::PoseOptimization(&mCurrentFrame);
@@ -963,12 +1082,53 @@ bool Tracking::TrackLocalMap()
         }
     }
 
+    int nDisgardPlane = 0;
+    for(int i =0; i<mCurrentFrame.mnPlaneNum; i++)
+    {
+        if(mCurrentFrame.mvpMapPlanes[i])
+        {
+            if(mCurrentFrame.mvpMapPlanes[i]!= nullptr && mCurrentFrame.mvbPlaneOutlier[i])
+            {
+                mCurrentFrame.mvpMapPlanes[i]=static_cast<MapPlane*>(NULL);
+                nDisgardPlane++;
+            }
+            else
+                mnMatchesInliers++;
+        }
+
+        if(mCurrentFrame.mvpParallelPlanes[i])
+        {
+            if(mCurrentFrame.mvbParPlaneOutlier[i])
+            {
+                mCurrentFrame.mvpParallelPlanes[i]=static_cast<MapPlane*>(NULL);
+                mCurrentFrame.mvbParPlaneOutlier[i]=false;
+            }
+        }
+
+        if(mCurrentFrame.mvpVerticalPlanes[i])
+        {
+            if(mCurrentFrame.mvbVerPlaneOutlier[i])
+            {
+                mCurrentFrame.mvpVerticalPlanes[i]=static_cast<MapPlane*>(NULL);
+                mCurrentFrame.mvbVerPlaneOutlier[i]=false;
+            }
+        }
+    }
+
+    for (int i = 0; i < mCurrentFrame.mnNotSeenPlaneNum; ++i) {
+        if (mCurrentFrame.mvpNotSeenMapPlanes[i]) {
+            if (mCurrentFrame.mvbNotSeenPlaneOutlier[i]) {
+                mCurrentFrame.mvpNotSeenMapPlanes[i] = static_cast<MapPlane *>(NULL);
+                mCurrentFrame.mvbNotSeenPlaneOutlier[i] = false;
+            }
+        }
+    }
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
     if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50)
         return false;
 
-    if(mnMatchesInliers<30)
+    if(mnMatchesInliers<10) //30
         return false;
     else
         return true;
@@ -984,6 +1144,8 @@ bool Tracking::NeedNewKeyFrame()
     if(mpLocalMapper->isStopped() || mpLocalMapper->stopRequested())
         return false;
 
+
+
     const int nKFs = mpMap->KeyFramesInMap();
 
     // Do not insert keyframes if not enough frames have passed from last relocalisation
@@ -998,6 +1160,7 @@ bool Tracking::NeedNewKeyFrame()
 
     // Local Mapping accept keyframes?
     bool bLocalMappingIdle = mpLocalMapper->AcceptKeyFrames();
+
 
     // Check how many "close" points are being tracked and how many could be potentially created.
     int nNonTrackedClose = 0;
@@ -1057,8 +1220,31 @@ bool Tracking::NeedNewKeyFrame()
                 return false;
         }
     }
-    else
-        return false;
+
+    //Check the current frame whether has a new plane
+    if(mCurrentFrame.mbNewPlane){
+        // If the mapping accepts keyframes, insert keyframe.
+        // Otherwise send a signal to interrupt BA
+        if(bLocalMappingIdle)
+        {
+            return true;
+        }
+        else
+        {
+            mpLocalMapper->InterruptBA();
+            if(mSensor!=System::MONOCULAR)
+            {
+                if(mpLocalMapper->KeyframesInQueue()<3)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+    }
+
+    return false;
 }
 
 void Tracking::CreateNewKeyFrame()
@@ -1074,6 +1260,50 @@ void Tracking::CreateNewKeyFrame()
     if(mSensor!=System::MONOCULAR)
     {
         mCurrentFrame.UpdatePoseMatrices();
+
+        mpMap->AssociatePlanesByBoundary(mCurrentFrame);
+
+        for (int i = 0; i < mCurrentFrame.mnPlaneNum; ++i) {
+            if(mCurrentFrame.mvpParallelPlanes[i]){
+                mCurrentFrame.mvpParallelPlanes[i]->AddParObservation(pKF,i);
+            }
+            if(mCurrentFrame.mvpVerticalPlanes[i]){
+                mCurrentFrame.mvpVerticalPlanes[i]->AddVerObservation(pKF,i);
+            }
+
+            if(mCurrentFrame.mvpMapPlanes[i]) {
+                mCurrentFrame.mvpMapPlanes[i]->AddObservation(pKF, i);
+                if(!mCurrentFrame.mvpMapPlanes[i]->mbSeen) {
+                    mCurrentFrame.mvpMapPlanes[i]->mbSeen = true;
+                    mpMap->AddMapPlane(mCurrentFrame.mvpMapPlanes[i]);
+                    mpMap->EraseNotSeenMapPlane(mCurrentFrame.mvpMapPlanes[i]);
+                }
+                continue;
+            }
+
+            if(mCurrentFrame.mvbPlaneOutlier[i])
+                continue;
+
+            cv::Mat p3D = mCurrentFrame.ComputePlaneWorldCoeff(i);
+            MapPlane* pNewMP = new MapPlane(p3D, pKF, i, mpMap);
+            mpMap->AddMapPlane(pNewMP);
+            pKF->AddMapPlane(pNewMP, i);
+        }
+
+        for (int i = 0; i < mCurrentFrame.mnNotSeenPlaneNum; ++i) {
+            if(mCurrentFrame.mvpNotSeenMapPlanes[i]) {
+                mCurrentFrame.mvpNotSeenMapPlanes[i]->AddNotSeenObservation(pKF,i);
+                continue;
+            }
+
+            cv::Mat p3D = mCurrentFrame.ComputeNotSeenPlaneWorldCoeff(i);
+            MapPlane* pNewMP = new MapPlane(p3D, pKF, i, mpMap, false);
+            mpMap->AddNotSeenMapPlane(pNewMP);
+            pKF->AddNotSeenMapPlane(pNewMP, i);
+        }
+
+
+        ORB_SLAM2::Timer::SetPlaneLMNum(mpMap->MapPlanesInMap());
 
         // We sort points by the measured depth by the stereo/RGBD sensor.
         // We create all those MapPoints whose depth < mThDepth.

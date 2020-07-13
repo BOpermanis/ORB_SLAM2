@@ -30,6 +30,12 @@
 #include "KeyFrameDatabase.h"
 
 #include <mutex>
+#include <pcl/common/transforms.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/ModelCoefficients.h>
+
 
 
 namespace ORB_SLAM2
@@ -37,13 +43,15 @@ namespace ORB_SLAM2
 
 class Map;
 class MapPoint;
+class MapPlane;
 class Frame;
 class KeyFrameDatabase;
 
 class KeyFrame
 {
-    static int nr_kf;
 public:
+    typedef pcl::PointXYZRGB PointT;
+    typedef pcl::PointCloud <PointT> PointCloud;
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
 
     // Pose functions
@@ -88,6 +96,10 @@ public:
     void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP);
     std::set<MapPoint*> GetMapPoints();
     std::vector<MapPoint*> GetMapPointMatches();
+    void ReplaceMapPlaneMatch(const int &idx, MapPlane* pMP);
+    std::set<MapPoint*> GetMapPoints();
+    std::vector<MapPoint*> GetMapPointMatches();
+    std::vector<MapPlane*> GetMapPlaneMatches();
     int TrackedMapPoints(const int &minObs);
     MapPoint* GetMapPoint(const size_t &idx);
 
@@ -118,6 +130,8 @@ public:
     static bool lId(KeyFrame* pKF1, KeyFrame* pKF2){
         return pKF1->mnId<pKF2->mnId;
     }
+    //Plane functions
+    cv::Mat ComputePlaneWorldCoeff(const int &idx);
 
 
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
@@ -192,7 +206,31 @@ public:
     const cv::Mat mK;
     cv::Mat depth_image;
 
+    //For PointCloud
+    std::vector<PointCloud> mvPlanePoints;
+    std::vector<PointCloud> mvBoundaryPoints;
+    std::vector<cv::Mat> mvPlaneCoefficients;
 
+//    std::vector<PointCloud> mvNotSeenPlanePoints;
+    std::vector<PointCloud> mvNotSeenBoundaryPoints;
+    std::vector<cv::Mat> mvNotSeenPlaneCoefficients;
+
+    int mnPlaneNum;
+    int mnRealPlaneNum;
+    int mnNotSeenPlaneNum;
+    std::vector<MapPlane*> mvpMapPlanes;
+    std::vector<MapPlane*> mvpNotSeenMapPlanes;
+    std::vector<MapPlane*> mvpParallelPlanes;
+    std::vector<MapPlane*> mvpVerticalPlanes;
+    bool mbNewPlane; // used to determine a keyframe
+
+    void AddMapPlane(MapPlane* pMP, const int &idx);
+    void AddParMapPlane(MapPlane* pMP, const int &idx);
+    void AddVerMapPlane(MapPlane* pMP, const int &idx);
+    void AddNotSeenMapPlane(MapPlane* pMP, const int &idx);
+    void EraseMapPlaneMatch(const int &idx);
+    void EraseMapPlaneMatch(MapPlane* pMP);
+    void EraseNotSeenMapPlaneMatch(MapPlane* pMP);
     // The following variables need to be accessed trough a mutex to be thread safe.
 protected:
 
@@ -236,6 +274,8 @@ protected:
     std::mutex mMutexPose;
     std::mutex mMutexConnections;
     std::mutex mMutexFeatures;
+
+
 };
 
 } //namespace ORB_SLAM

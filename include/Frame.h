@@ -32,6 +32,23 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "Config.h"
+#include "MapPlane.h"
+
+#include <opencv2/opencv.hpp>
+
+#include <pcl/common/transforms.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/ModelCoefficients.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/radius_outlier_removal.h>
+#include <pcl/segmentation/organized_multi_plane_segmentation.h>
+#include <pcl/features/integral_image_normal.h>
 namespace ORB_SLAM2
 {
 #define FRAME_GRID_ROWS 48
@@ -39,12 +56,15 @@ namespace ORB_SLAM2
 
 class MapPoint;
 class KeyFrame;
+class MapPlane;
 
 class Frame
 {
-public:
-    Frame();
 
+public:
+    typedef pcl::PointXYZRGB PointT;
+    typedef pcl::PointCloud <PointT> PointCloud;
+    Frame();
     // Copy constructor.
     Frame(const Frame &frame);
 
@@ -101,6 +121,20 @@ public:
     bool flagPlaneDetection;
     cv::Mat depth_image;
 
+    //Plane functions
+    void ComputePlanesFromPointCloud(const cv::Mat &imDepth);
+    void ComputePlanesFromOrganizedPointCloud(const cv::Mat &imDepth);
+    void GeneratePlanesFromBoundries(const cv::Mat &imDepth);
+    bool CaculatePlanes(const cv::Mat& inputplane,
+                        const cv::Mat& inputline);
+    bool PlaneNotSeen(const cv::Mat& coef);
+    bool LineInRange(const cv::Mat& Pc);
+    bool IsBorderLine(const PointCloud::Ptr line, const cv::Mat &imDepth);
+    bool IsBorderPoint(const cv::Mat &Pc, const cv::Mat &imDepth);
+    cv::Mat ComputePlaneWorldCoeff(const int &idx);
+    cv::Mat ComputeNotSeenPlaneWorldCoeff(const int &idx);
+
+    void GenerateBoundaryPoints(int i);
 public:
     // Vocabulary used for relocalization.
     ORBVocabulary* mpORBvocabulary;
@@ -166,6 +200,8 @@ public:
     // Camera pose.
     cv::Mat mTcw;
 
+    cv::Mat mTwc;
+
     // Current and Next Frame id.
     static long unsigned int nNextId;
     long unsigned int mnId;
@@ -190,7 +226,29 @@ public:
 
     static bool mbInitialComputations;
 
+    //For PointCloud
+    std::vector<PointCloud> mvPlanePoints;
+    std::vector<PointCloud> mvNotSeenPlanePoints;
 
+    std::vector<PointCloud> mvBoundaryPoints;
+    std::vector<PointCloud> mvNotSeenBoundaryPoints;
+
+    std::vector<cv::Mat> mvPlaneCoefficients;
+    std::vector<cv::Mat> mvNotSeenPlaneCoefficients;
+
+    std::vector<MapPlane*> mvpMapPlanes;
+    std::vector<MapPlane*> mvpNotSeenMapPlanes;
+    std::vector<MapPlane*> mvpParallelPlanes;
+    std::vector<MapPlane*> mvpVerticalPlanes;
+    // Flag to identify outlier planes new planes.
+    std::vector<bool> mvbPlaneOutlier;
+    std::vector<bool> mvbNotSeenPlaneOutlier;
+    std::vector<bool> mvbParPlaneOutlier;
+    std::vector<bool> mvbVerPlaneOutlier;
+    int mnPlaneNum;
+    int mnRealPlaneNum;
+    int mnNotSeenPlaneNum;
+    bool mbNewPlane; // used to determine a keyframe
 private:
 
     // Undistort keypoints given OpenCV distortion parameters.

@@ -32,7 +32,7 @@
 #include <thread>
 #include <mutex>
 #include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
-
+// #include<g2o/types/sim3/types_seven_dof_expmap.h>
 namespace ORB_SLAM2
 {
 
@@ -126,7 +126,11 @@ protected:
     std::vector<KeyFrame*> mvpEnoughConsistentCandidates;
     std::vector<KeyFrame*> mvpCurrentConnectedKFs;
     std::vector<MapPoint*> mvpCurrentMatchedPoints;
+    std::vector<MapPlane*> mvpCurrentMatchedPlanes;
+    std::vector<MapPlane*> mvpCurrentMatchedParPlanes;
+    std::vector<MapPlane*> mvpCurrentMatchedVerPlanes;
     std::vector<MapPoint*> mvpLoopMapPoints;
+    std::vector<MapPlane*> mvpLoopMapPlanes;
     cv::Mat mScw;
     g2o::Sim3 mg2oScw;
 

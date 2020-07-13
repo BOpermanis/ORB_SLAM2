@@ -1,5 +1,3 @@
-#include<unistd.h>
-
 /**
 * This file is part of ORB-SLAM2.
 *
@@ -29,10 +27,10 @@
 #include "Optimizer.h"
 
 #include "ORBmatcher.h"
-
+#include "Config.h"
 #include<mutex>
 #include<thread>
-
+#include <unistd.h>
 
 namespace ORB_SLAM2
 {
@@ -60,10 +58,12 @@ void LoopClosing::Run()
 {
     mbFinished =false;
 
+    int bLoop = Config::Get<int>("SLAM.Loop");
+
     while(1)
     {
-        // Check if there are keyframes in the queue
-        if(CheckNewKeyFrames())
+//         Check if there are keyframes in the queue
+        if(bLoop>0 && CheckNewKeyFrames())
         {
             // Detect loop candidates and check covisibility consistency
             if(DetectLoop())
@@ -76,7 +76,7 @@ void LoopClosing::Run()
                    CorrectLoop();
                }
             }
-        }       
+        }
 
         ResetIfRequested();
 
@@ -351,13 +351,15 @@ bool LoopClosing::ComputeSim3()
         return false;
     }
 
-    // Retrieve MapPoints seen in Loop Keyframe and neighbors
+
     vector<KeyFrame*> vpLoopConnectedKFs = mpMatchedKF->GetVectorCovisibleKeyFrames();
     vpLoopConnectedKFs.push_back(mpMatchedKF);
     mvpLoopMapPoints.clear();
+    mvpLoopMapPlanes.clear();
     for(vector<KeyFrame*>::iterator vit=vpLoopConnectedKFs.begin(); vit!=vpLoopConnectedKFs.end(); vit++)
     {
         KeyFrame* pKF = *vit;
+        // Retrieve MapPoints seen in Loop Keyframe and neighbors
         vector<MapPoint*> vpMapPoints = pKF->GetMapPointMatches();
         for(size_t i=0, iend=vpMapPoints.size(); i<iend; i++)
         {
@@ -371,10 +373,26 @@ bool LoopClosing::ComputeSim3()
                 }
             }
         }
+        // Retrieve MapPlanes seen in Loop Keyframe and neighbors
+        vector<MapPlane*> vpMapPlanes = pKF->GetMapPlaneMatches();
+        for(size_t i=0, iend=vpMapPlanes.size(); i<iend; i++)
+        {
+            MapPlane* pMP = vpMapPlanes[i];
+            if(pMP)
+            {
+                if(pMP->mnLoopPointForKF!=mpCurrentKF->mnId)
+                {
+                    mvpLoopMapPlanes.push_back(pMP);
+                    pMP->mnLoopPointForKF=mpCurrentKF->mnId;
+                }
+            }
+        }
     }
 
     // Find more matches projecting with the computed Sim3
     matcher.SearchByProjection(mpCurrentKF, mScw, mvpLoopMapPoints, mvpCurrentMatchedPoints,10);
+
+    mpMap->SearchMatchedPlanes(mpCurrentKF, mScw, mvpLoopMapPlanes, mvpCurrentMatchedPlanes, mvpCurrentMatchedParPlanes, mvpCurrentMatchedVerPlanes);
 
     // If enough matches accept Loop
     int nTotalMatches = 0;
@@ -479,6 +497,14 @@ void LoopClosing::CorrectLoop()
 
             g2o::Sim3 g2oSiw =NonCorrectedSim3[pKFi];
 
+            cv::Mat cvSwi = Converter::toCvMat(g2oSiw.inverse());
+            cv::Mat cvSwiT;
+            cv::transpose(cvSwi, cvSwiT);
+
+            cv::Mat cvCorrectedSiw = Converter::toCvMat(g2oCorrectedSiw);
+            cv::Mat cvCorrectedSiwT;
+            cv::transpose(cvCorrectedSiw, cvCorrectedSiwT);
+
             vector<MapPoint*> vpMPsi = pKFi->GetMapPointMatches();
             for(size_t iMP=0, endMPi = vpMPsi.size(); iMP<endMPi; iMP++)
             {
@@ -501,6 +527,27 @@ void LoopClosing::CorrectLoop()
                 pMPi->mnCorrectedReference = pKFi->mnId;
                 pMPi->UpdateNormalAndDepth();
             }
+
+            // Correct all MapPlanes obsrved by current keyframe and neighbors, so that they align with the other side of the loop
+            vector<MapPlane*> vpMPlanesi = pKFi->GetMapPlaneMatches();
+            for(size_t iMP=0, endMPi = vpMPlanesi.size(); iMP<endMPi; iMP++)
+            {
+                MapPlane* pMPi = vpMPlanesi[iMP];
+                if(!pMPi)
+                    continue;
+                if(pMPi->mnCorrectedByKF==mpCurrentKF->mnId)
+                    continue;
+
+                // Project with non-corrected pose and project back with corrected pose
+                cv::Mat P3Dw = pMPi->GetWorldPos();
+
+                cv::Mat cvCorrectedP3Dw = cvCorrectedSiwT*(cvSwiT*P3Dw);
+
+                pMPi->SetWorldPos(cvCorrectedP3Dw);
+                pMPi->mnCorrectedByKF = mpCurrentKF->mnId;
+                pMPi->mnCorrectedReference = pKFi->mnId;
+            }
+
 
             // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
             Eigen::Matrix3d eigR = g2oCorrectedSiw.rotation().toRotationMatrix();
@@ -536,8 +583,60 @@ void LoopClosing::CorrectLoop()
             }
         }
 
-    }
+//        // Update matched map planes and replace if duplicated
+        for(size_t i=0; i<mvpCurrentMatchedPlanes.size(); i++)
+        {
+            if(mvpCurrentMatchedPlanes[i])
+            {
+                MapPlane* pLoopMP = mvpCurrentMatchedPlanes[i];
+                MapPlane* pCurMP = mpCurrentKF->mvpMapPlanes[i];
+                if(pCurMP)
+                    continue;
+//                    pCurMP->Replace(pLoopMP);
+                else
+                {
+                    mpCurrentKF->AddMapPlane(pLoopMP,i);
+                    pLoopMP->AddObservation(mpCurrentKF,i);
 
+                }
+            }
+        }
+        // Update matched map points and replace if duplicated
+        for(size_t i=0; i<mvpCurrentMatchedParPlanes.size(); i++)
+        {
+            if(mvpCurrentMatchedParPlanes[i])
+            {
+                MapPlane* pLoopMP = mvpCurrentMatchedParPlanes[i];
+                MapPlane* pCurMP = mpCurrentKF->mvpParallelPlanes[i];
+
+                if(pCurMP) {
+                    if (pLoopMP->mnId == pCurMP->mnId)
+                        continue;
+                    pCurMP->EraseParObservation(mpCurrentKF);
+                }
+                mpCurrentKF->AddParMapPlane(pLoopMP,i);
+                pLoopMP->AddParObservation(mpCurrentKF,i);
+            }
+        }
+        // Update matched map points and replace if duplicated
+        for(size_t i=0; i<mvpCurrentMatchedVerPlanes.size(); i++)
+        {
+            if(mvpCurrentMatchedVerPlanes[i])
+            {
+                MapPlane* pLoopMP = mvpCurrentMatchedVerPlanes[i];
+                MapPlane* pCurMP = mpCurrentKF->mvpVerticalPlanes[i];
+                if(pCurMP) {
+                    if (pLoopMP->mnId == pCurMP->mnId)
+                        continue;
+                    pCurMP->EraseVerObservation(mpCurrentKF);
+                }
+                mpCurrentKF->AddVerMapPlane(pLoopMP,i);
+                pLoopMP->AddVerObservation(mpCurrentKF,i);
+            }
+        }
+
+    }
+    cout << "Correct Current frame." << endl;
     // Project MapPoints observed in the neighborhood of the loop keyframe
     // into the current keyframe and neighbors using corrected poses.
     // Fuse duplications.
@@ -600,8 +699,16 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap)
         vector<MapPoint*> vpReplacePoints(mvpLoopMapPoints.size(),static_cast<MapPoint*>(NULL));
         matcher.Fuse(pKF,cvScw,mvpLoopMapPoints,4,vpReplacePoints);
 
+        vector<MapPlane*> vpMatchedPlanes;
+        vector<MapPlane*> vpMatchedParPlanes;
+        vector<MapPlane*> vpMatchedVerPlanes;
+
+        mpMap->SearchMatchedPlanes(pKF,cvScw,mvpLoopMapPlanes,vpMatchedPlanes,vpMatchedParPlanes,vpMatchedVerPlanes);
+
         // Get Map Mutex
         unique_lock<mutex> lock(mpMap->mMutexMapUpdate);
+
+
         const int nLP = mvpLoopMapPoints.size();
         for(int i=0; i<nLP;i++)
         {
@@ -611,7 +718,60 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap)
                 pRep->Replace(mvpLoopMapPoints[i]);
             }
         }
+
+        for(size_t i=0; i<vpMatchedPlanes.size(); i++)
+        {
+            if(vpMatchedPlanes[i])
+            {
+                MapPlane* pLoopMP = vpMatchedPlanes[i];
+                MapPlane* pCurMP = pKF->mvpMapPlanes[i];
+                if(pCurMP)
+                    pCurMP->Replace(pLoopMP);
+                else
+                {
+                    pKF->AddMapPlane(pLoopMP,i);
+                    pLoopMP->AddObservation(pKF,i);
+                }
+            }
+        }
+
+
+        for(size_t i=0; i<vpMatchedParPlanes.size(); i++)
+        {
+            if(vpMatchedParPlanes[i])
+            {
+                MapPlane* pLoopMP = vpMatchedParPlanes[i];
+                MapPlane* pCurMP = pKF->mvpParallelPlanes[i];
+
+                if(pCurMP) {
+                    if (pLoopMP->mnId == pCurMP->mnId)
+                        continue;
+                    pCurMP->EraseParObservation(pKF);
+                }
+                pKF->AddParMapPlane(pLoopMP,i);
+                pLoopMP->AddParObservation(pKF,i);
+            }
+        }
+
+        for(size_t i=0; i<vpMatchedVerPlanes.size(); i++)
+        {
+            if(vpMatchedVerPlanes[i])
+            {
+                MapPlane* pLoopMP = vpMatchedVerPlanes[i];
+                MapPlane* pCurMP = pKF->mvpVerticalPlanes[i];
+
+                if(pCurMP) {
+                    if(pLoopMP->mnId == pCurMP->mnId)
+                        continue;
+                    pCurMP->EraseVerObservation(pKF);
+                }
+                pKF->AddVerMapPlane(pLoopMP,i);
+                pLoopMP->AddVerObservation(pKF,i);
+            }
+        }
+        cout << "Correct one" << endl;
     }
+    cout << "Correct all." << endl;
 }
 
 
@@ -736,7 +896,38 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
 
                     pMP->SetWorldPos(Rwc*Xc+twc);
                 }
-            }            
+            }
+
+            // Correct MapPlanes
+            const vector<MapPlane*> vpMPls = mpMap->GetAllMapPlanes();
+
+            for(size_t i=0; i<vpMPls.size(); i++)
+            {
+                MapPlane* pMP = vpMPls[i];
+
+                if(pMP->isBad())
+                    continue;
+
+                if(pMP->mnBAGlobalForKF==nLoopKF)
+                {
+                    // If optimized by Global BA, just update
+                    pMP->SetWorldPos(pMP->mPosGBA);
+                }
+                else
+                {
+                    // Update according to the correction of its reference keyframe
+                    KeyFrame* pRefKF = pMP->GetReferenceKeyFrame();
+
+                    if(pRefKF->mnBAGlobalForKF!=nLoopKF)
+                        continue;
+
+                    int index = pMP->GetIndexInKeyFrame(pRefKF);
+                    if(index == -1)
+                        continue;
+
+                    pMP->SetWorldPos(pRefKF->ComputePlaneWorldCoeff(index));
+                }
+            }
 
             mpMap->InformNewBigChange();
 

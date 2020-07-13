@@ -28,7 +28,7 @@
 #include "Frame.h"
 
 #include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
-
+// #include<g2o/types/sim3/types_seven_dof_expmap.h>
 namespace ORB_SLAM2
 {
 
@@ -38,6 +38,7 @@ class Optimizer
 {
 public:
     void static BundleAdjustment(const std::vector<KeyFrame*> &vpKF, const std::vector<MapPoint*> &vpMP,
+                                 const std::vector<MapPlane*> &vpMPl, const std::vector<MapPlane*> &vpNMPl,
                                  int nIterations = 5, bool *pbStopFlag=NULL, const unsigned long nLoopKF=0,
                                  const bool bRobust = true);
     void static GlobalBundleAdjustemnt(Map* pMap, int nIterations=5, bool *pbStopFlag=NULL,

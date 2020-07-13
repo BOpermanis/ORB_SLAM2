@@ -22,10 +22,10 @@
 #include "LoopClosing.h"
 #include "ORBmatcher.h"
 #include "Optimizer.h"
-#include<unistd.h>
 
 #include<mutex>
-
+#include <Timer.h>
+#include <unistd.h>
 namespace ORB_SLAM2
 {
 
@@ -58,6 +58,7 @@ void LocalMapping::Run()
         // Check if there are keyframes in the queue
         if(CheckNewKeyFrames())
         {
+//            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
             // BoW conversion and insertion in Map
             ProcessNewKeyFrame();
 
@@ -77,14 +78,24 @@ void LocalMapping::Run()
 
             if(!CheckNewKeyFrames() && !stopRequested())
             {
-                // Local BA
-                if(mpMap->KeyFramesInMap()>2)
-                    Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpMap);
 
+                // Local BA
+                if(mpMap->KeyFramesInMap()>2) {
+                    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+
+                    Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame, &mbAbortBA, mpMap);
+
+                    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+                    double tt = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+                    ORB_SLAM2::Timer::SetTLocalBA(tt);
+                }
                 // Check redundant local Keyframes
                 KeyFrameCulling();
             }
 
+//            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+//            double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+//            cout<< "Time of local BA : " << ttrack << "s" << endl;
             mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
         }
         else if(Stop())
@@ -636,12 +647,15 @@ void LocalMapping::KeyFrameCulling()
     // A keyframe is considered redundant if the 90% of the MapPoints it sees, are seen
     // in at least other 3 keyframes (in the same or finer scale)
     // We only consider close stereo points
+    if(mpCurrentKeyFrame->mbNewPlane)
+        return;
+
     vector<KeyFrame*> vpLocalKeyFrames = mpCurrentKeyFrame->GetVectorCovisibleKeyFrames();
 
     for(vector<KeyFrame*>::iterator vit=vpLocalKeyFrames.begin(), vend=vpLocalKeyFrames.end(); vit!=vend; vit++)
     {
         KeyFrame* pKF = *vit;
-        if(pKF->mnId==0)
+        if(pKF->mnId==0 || pKF->mbNewPlane)
             continue;
         const vector<MapPoint*> vpMapPoints = pKF->GetMapPointMatches();
 

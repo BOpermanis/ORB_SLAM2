@@ -38,15 +38,20 @@ endif()
 
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
+#find_package( G2O REQUIRED )
+find_package( PCL 1.7 REQUIRED)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/g2oAddition
 ${PROJECT_SOURCE_DIR}/include
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
-#"/librealsense/include"
-#"/slamdoom/libs/opencv3/include"
+        ${PCL_INCLUDE_DIRS}
+#${G2O_INCLUDE_DIRS}
 )
+add_definitions( ${PCL_DEFINITIONS} )
+link_directories( ${PCL_LIBRARY_DIRS} )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
@@ -88,7 +93,10 @@ src/Viewer.cc
         g2oAddition/EdgeTwoParPlanes.h
         g2oAddition/EdgeTwoVerPlanes.cc
         g2oAddition/EdgeTwoVerPlanes.h
+        include/Timer.h
+           src/Timer.cc
         )
+
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
@@ -96,6 +104,7 @@ ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+        ${PCL_LIBRARIES}
 )
 
 # Build examples

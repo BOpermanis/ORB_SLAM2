@@ -1,5 +1,3 @@
-#include<unistd.h>
-
 /**
 * This file is part of ORB-SLAM2.
 *
@@ -27,8 +25,7 @@
 #include <thread>
 #include <pangolin/pangolin.h>
 #include <iomanip>
-#include "MapPoint.h"
-
+#include <unistd.h>
 namespace ORB_SLAM2
 {
 
@@ -79,7 +76,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
 
     //Create the Map
-    mpMap = new Map();
+    mpMap = new Map(strSettingsFile);
 
     //Create Drawers. These are used by the Viewer
     mpFrameDrawer = new FrameDrawer(mpMap);
@@ -87,6 +84,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     //Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this constructor)
+
     mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
                              mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
 
@@ -327,6 +325,7 @@ void System::Shutdown()
 {
     mpLocalMapper->RequestFinish();
     mpLoopCloser->RequestFinish();
+    mpTracker->mpPointCloudMapping->shutdown();
     if(mpViewer)
     {
         mpViewer->RequestFinish();
@@ -403,6 +402,7 @@ void System::SaveTrajectoryTUM(const string &filename)
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
+
 
 void System::SaveKeyFrameTrajectoryTUM(const string &filename)
 {
@@ -493,6 +493,31 @@ void System::SaveTrajectoryKITTI(const string &filename)
     }
     f.close();
     cout << endl << "trajectory saved!" << endl;
+}
+
+void System::SavePlaneFeatures(const string &filename) {
+    cout << endl << "Saving Plane Features to " << filename << " ..." << endl;
+
+    vector<MapPlane*> vMPs = mpMap->GetAllMapPlanes();
+
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+
+    for(size_t i=0; i<vMPs.size(); i++)
+    {
+        MapPlane* plane = vMPs[i];
+
+        if(plane->isBad())
+            continue;
+
+        cv::Mat p = plane->GetWorldPos();
+        f << setprecision(6) << p.at<float>(0, 0) << " " << p.at<float>(1, 0) << " " << p.at<float>(2, 0) << " " << p.at<float>(3, 0) << endl;
+    }
+
+    f.close();
+    cout << endl << "Plane features saved!" << endl;
+
 }
 
 int System::GetTrackingState()
