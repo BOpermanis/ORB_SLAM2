@@ -26,8 +26,7 @@
 
 namespace ORB_SLAM2 {
 
-    Map::Map(const string &strSettingPath) : mnMaxKFid(0), mnBigChangeIdx(0) {
-        cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
+    Map::Map(const cv::FileStorage &fSettings) : mnMaxKFid(0), mnBigChangeIdx(0) {
         mfDisTh = fSettings["Plane.AssociationDisRef"];
         mfAngleTh = fSettings["Plane.AssociationAngRef"];
         mfVerTh = fSettings["Plane.VerticalThreshold"];

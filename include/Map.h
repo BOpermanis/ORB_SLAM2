@@ -47,7 +47,7 @@ class Map
 public:
     typedef pcl::PointXYZRGB PointT;
     typedef pcl::PointCloud <PointT> PointCloud;
-    Map(const string &strSettingPath);
+    Map(const cv::FileStorage &fSettings);
 
     void AddKeyFrame(KeyFrame* pKF);
     void AddMapPoint(MapPoint* pMP);

@@ -143,6 +143,11 @@ add_executable(mono_euroc
 Examples/Monocular/mono_euroc.cc)
 target_link_libraries(mono_euroc ${PROJECT_NAME})
 
+add_executable(slam_run_zeros
+        Examples/slam_run_zeros.cpp)
+target_link_libraries(slam_run_zeros ${PROJECT_NAME})
+
+
 add_executable(cape_offline
         CAPE/run_cape_offline.cpp
         CAPE/CAPE.cpp

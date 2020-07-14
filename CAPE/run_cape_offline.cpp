@@ -154,6 +154,7 @@ int main(int argc, char ** argv){
     cv::Mat K_rgb, K_ir, dist_coeffs_rgb, dist_coeffs_ir, R_stereo, t_stereo;
     stringstream calib_path;
     calib_path<<string_buff.str()<<"/calib_params.xml";
+    cout << "calib_path: " << calib_path.str() <<  endl;
     auto params = loadCalibParameters(calib_path.str());
 
     auto plane_detector = capewrap(params);

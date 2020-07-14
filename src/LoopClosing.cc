@@ -58,7 +58,7 @@ void LoopClosing::Run()
 {
     mbFinished =false;
 
-    int bLoop = Config::Get<int>("SLAM.Loop");
+    int bLoop = true; //Config::Get<int>("SLAM.Loop");
 
     while(1)
     {

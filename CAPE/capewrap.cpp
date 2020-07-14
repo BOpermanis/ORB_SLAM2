@@ -217,7 +217,7 @@ public:
         cy_rgb = fSettings["Camera.cy"];
         width  = int(fSettings["Camera.width"]);
         height = int(fSettings["Camera.height"]);
-
+        cout << 1111 << endl;
         X = cv::Mat_<float>(height, width);
         Y = cv::Mat_<float>(height, width);
         X_pre = cv::Mat_<float>(height, width);
@@ -228,21 +228,25 @@ public:
         Y_t = cv::Mat_<float>(height, width);
         cloud_array = Eigen::MatrixXf(width * height, 3);
         cloud_array_organized = Eigen::MatrixXf(width * height, 3);
-
+        cout << 2222 << endl;
         int nr_horizontal_cells = width / PATCH_SIZE;
         int nr_vertical_cells = height / PATCH_SIZE;
 
         cv::Size s = X_pre.size();
-
-//        cout << "h " << s.height << " w " << s.width << " h1 " << height << " w1 " << width << endl;
-
+        cv::Size s1 = Y_pre.size();
+        cout << "h " << s.height << " w " << s.width << " h1 " << height << " w1 " << width << endl;
+        cout << "h " << s1.height << " w " << s1.width << " h1 " << height << " w1 " << width << endl;
+        cout << 3333 << endl;
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 // Not efficient but at this stage doesn t matter
+//                cout << "r, c " << r << " " << c << endl;
                 X_pre.at<float>(r, c) = (c - cx_ir) / fx_ir;
                 Y_pre.at<float>(r, c) = (r - cy_ir) / fy_ir;
             }
         }
+        cout << 4444 << endl;
+
         // Pre-computations for maping an image point cloud to a cache-friendly array where cell's local point clouds are contiguous
         cell_map = cv::Mat_<int>(height, width);
 
@@ -256,8 +260,12 @@ public:
                         (cell_r * nr_horizontal_cells + cell_c) * PATCH_SIZE * PATCH_SIZE + local_r * PATCH_SIZE + local_c;
             }
         }
+        cout << 5555 << endl;
+
 
         plane_detector = new CAPE(height, width, PATCH_SIZE, PATCH_SIZE, cylinder_detection, COS_ANGLE_MAX, MAX_MERGE_DIST);
+        cout << 6666 << endl;
+
     }
 
     cape_output process(const cv::Mat &imD) {

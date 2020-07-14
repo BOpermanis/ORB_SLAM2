@@ -103,8 +103,8 @@ Plane.ShowSPlane: 1
 #--------------------------------------------------------------------------------------------
 # Result File Paths
 #--------------------------------------------------------------------------------------------
-SavePath.Frame: "FrameTrajectory.txt"
-SavePath.Keyframe: "KeyFrameTrajectory.txt"
-SavePath.PlaneFeature: "PlaneFeature.txt"
+#SavePath.Frame: "FrameTrajectory.txt"
+#SavePath.Keyframe: "KeyFrameTrajectory.txt"
+#SavePath.PlaneFeature: "PlaneFeature.txt"
 
 

@@ -32,17 +32,14 @@ namespace ORB_SLAM2
     typedef pcl::PointXYZRGB PointT;
     typedef pcl::PointCloud<PointT> PointCloud;
 
-MapDrawer::MapDrawer(Map* pMap, const string &strSettingPath):mpMap(pMap)
+MapDrawer::MapDrawer(Map* pMap, const cv::FileStorage &fSettings):mpMap(pMap)
 {
-    cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
-
     mKeyFrameSize = fSettings["Viewer.KeyFrameSize"];
     mKeyFrameLineWidth = fSettings["Viewer.KeyFrameLineWidth"];
     mGraphLineWidth = fSettings["Viewer.GraphLineWidth"];
     mPointSize = fSettings["Viewer.PointSize"];
     mCameraSize = fSettings["Viewer.CameraSize"];
     mCameraLineWidth = fSettings["Viewer.CameraLineWidth"];
-
 }
 
 void MapDrawer::DrawMapPoints()
